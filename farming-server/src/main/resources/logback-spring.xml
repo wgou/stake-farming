@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="10 seconds">
+    <contextName>logback</contextName>
+    <property name="log.path" value="/home/admin/server/logs" />
+
+    <!-- Output to Console -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>info</level>
+        </filter>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- File Appender -->
+    <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- Active log file -->
+        <file>${log.path}/all.log</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Archive pattern -->
+            <fileNamePattern>${log.path}/%d{yyyy-MM-dd}-%i-all.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- Retention policy -->
+            <maxHistory>100</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <springProfile name="dev,test,uat">
+        <logger name="org.springframework.web" level="info" />
+        <logger name="org.springboot.sample" level="info" />
+        <logger name="io.renren" level="info" />
+        <logger name="org.bitcoinj" level="info" />
+        <root level="info">
+            <appender-ref ref="console" />
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="org.springframework.web" level="ERROR" />
+        <logger name="org.springboot.sample" level="ERROR" />
+        <logger name="io.renren" level="INFO" />
+        <root level="info">
+            <appender-ref ref="INFO_FILE" />
+            <appender-ref ref="console" />
+        </root>
+    </springProfile>
+</configuration>
