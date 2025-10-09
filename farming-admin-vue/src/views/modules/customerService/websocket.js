@@ -11,7 +11,7 @@ let statusCallback = null;
 export const connectWebSocket = (userId, vueInstance, onMessageReceived, onStatusChange) => {
     if (onStatusChange) statusCallback = onStatusChange;
     if (socket && socket.readyState === WebSocket.OPEN) return; // 避免重复连接
-    socket = new WebSocket(`wss://admin.ftxbx.org/ws/${userId}`);
+    socket = new WebSocket(`wss://admin.cloudko.org/ws/${userId}`);
 
     socket.onopen = () => {
         vueInstance.$message.success('WebSocket 连接成功');

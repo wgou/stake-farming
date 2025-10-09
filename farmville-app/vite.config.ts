@@ -13,10 +13,10 @@ export default defineConfig({
     host: true, // 监听所有地址，包括localhost和IP地址
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'https://index.cloudko.org/stake',
+      '/stake': {
+        target: 'https://index.cloudko.org',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path // 保持 /stake 路径
       }
     }
   }
