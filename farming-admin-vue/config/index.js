@@ -15,7 +15,7 @@ module.exports = {
     proxyTable: devEnv.OPEN_PROXY === false ? {} : {
       '/stake': {
         //target: 'http://localhost:8082/',
-       target: 'https://admin.ftxbx.org/stake',
+       target: 'https://admin.cloudko.org/stake',
         changeOrigin: true,
         pathRewrite: {
           '^/stake': '/'
