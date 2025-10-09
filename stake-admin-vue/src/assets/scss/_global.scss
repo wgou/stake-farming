@@ -1,0 +1,33 @@
+::v-deep .el-input-group__append {
+    background: #1890ff;
+    color: #fff;
+    cursor: pointer;
+}
+
+::v-deep .el-dialog__body {
+    padding: 10px 30px 30px 30px;
+}
+
+::v-deep .el-dialog__header {
+    border-bottom: 1px solid #CCCCCC;
+    width: calc(100% - 40px);
+    margin-left: 20px;
+    display: flex;
+}
+
+.form-title {
+    color: #fff;
+    position: relative;
+    text-indent: 6px;
+    line-height: 24px;
+    padding-bottom: 10px;
+
+    &::after {
+        position: absolute;
+        left: 0px;
+        content: '';
+        width: 4px;
+        height: 24px;
+        background-color: #465FE2;
+    }
+}
