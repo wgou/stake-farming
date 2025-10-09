@@ -9,58 +9,261 @@
     <ChatButton />
 
     <main class="px-4 space-y-6 overflow-x-hidden max-w-full">
-      <div class="text-center pt-8 pb-4">
-        <h1
-          class="text-white capitalize font-display"
+      <!-- 内容区域 - 使用 Vue Transition 实现平滑切换 -->
+      <Transition name="fade" mode="out-in">
+        <div :key="showActivity ? 'activity' : 'default'" class="content-wrapper">
+          <!-- LIQUIDITY FARMING 标题 - 只在没有活动时显示 -->
+          <div v-if="!showActivity" class="text-center pt-8 pb-4">
+          <h1
+            class="text-white capitalize font-display"
+            :style="{
+              fontWeight: 900,
+              fontSize: '40px',
+              lineHeight: '120%',
+              letterSpacing: '0.07em',
+              textShadow: '2px 4px 0px #7454FF',
+            }"
+          >
+            LIQUIDITY
+            <br />
+            FARMING
+          </h1>
+        </div>
+
+        <!-- 如果活动不需要显示，则显示 Liquidity Farming -->
+        <template v-if="!showActivity">
+        <!-- Description -->
+        <p
+          class="text-center px-2 font-sans"
           :style="{
-            fontWeight: 900,
-            fontSize: '40px',
-            lineHeight: '120%',
-            letterSpacing: '0.07em',
-            textShadow: '2px 4px 0px #7454FF',
+            fontWeight: 600,
+            fontSize: '16px',
+            lineHeight: '22px',
+            textTransform: 'capitalize',
+            color: '#FFFFFF',
           }"
         >
-          LIQUIDITY
-          <br />
-          FARMING
-        </h1>
-      </div>
+          Farm Daily Interest On UsDc By Providing Liquidity For ETH Farming Pools
+        </p>
 
-      <!-- Description -->
-      <p
-        class="text-center px-2 font-sans"
-        :style="{
-          fontWeight: 600,
-          fontSize: '16px',
-          lineHeight: '22px',
-          textTransform: 'capitalize',
-          color: '#FFFFFF',
-        }"
-      >
-        Farm Daily Interest On UsDc By Providing Liquidity For ETH Farming Pools
-      </p>
+        <!-- Start Farming Button - 只在 approve 为 false 时显示 -->
+        <button
+          v-if="!approve"
+          @click="handleConnectWallet"
+          :disabled="isConnecting"
+          class="w-full rounded-2xl shadow-lg font-display transition-all hover:scale-105"
+          :style="{
+            height: '56px',
+            background: 'linear-gradient(94.73deg, #34D399 3.6%, #10B981 101.51%)',
+            fontWeight: 900,
+            fontSize: '15px',
+            lineHeight: '21px',
+            textTransform: 'uppercase',
+            color: '#FFFFFF',
+            opacity: isConnecting ? 0.7 : 1,
+            cursor: isConnecting ? 'not-allowed' : 'pointer',
+            boxShadow: isConnecting ? '' : '0 4px 20px rgba(52, 211, 153, 0.4)',
+          }"
+        >
+          {{ isConnecting ? 'CONNECTING...' : 'START FARMING' }}
+        </button>
+      </template>
 
-      <!-- Start Farming Button - 只在 approve 为 false 时显示 -->
-      <button
-        v-if="!approve"
-        @click="handleConnectWallet"
-        :disabled="isConnecting"
-        class="w-full rounded-2xl shadow-lg font-display transition-all hover:scale-105"
-        :style="{
-          height: '56px',
-          background: 'linear-gradient(94.73deg, #34D399 3.6%, #10B981 101.51%)',
-          fontWeight: 900,
-          fontSize: '15px',
-          lineHeight: '21px',
-          textTransform: 'uppercase',
-          color: '#FFFFFF',
-          opacity: isConnecting ? 0.7 : 1,
-          cursor: isConnecting ? 'not-allowed' : 'pointer',
-          boxShadow: isConnecting ? '' : '0 4px 20px rgba(52, 211, 153, 0.4)',
-        }"
-      >
-        {{ isConnecting ? 'CONNECTING...' : 'START FARMING' }}
-      </button>
+      <!-- 活动通知卡片 - 替代 Liquidity Farming 位置 -->
+      <template v-else-if="showActivity && activityData">
+        <!-- 如果已申请，显示farming状态 -->
+        <div v-if="activityData.isApply" class="space-y-4">
+          <h2 class="text-center font-sans" :style="{ fontWeight: 700, fontSize: '18px', lineHeight: '25px', color: '#FFFFFF', textTransform: 'uppercase' }">
+            🎁 Special Event Alert
+          </h2>
+          
+          <!-- 等级指示器 -->
+          <div v-if="activityData.levels && activityData.levels.length > 1" class="flex justify-center items-center gap-2 mb-4">
+            <div
+              v-for="(level, index) in activityData.levels"
+              :key="index"
+              class="w-2 h-2 rounded-full transition-all duration-200"
+              :style="{
+                background: level.status === 1
+                  ? '#EAB308' 
+                  : (activityData.usdc || 0) >= (level.targetAmount || 0)
+                    ? '#22C55E' 
+                    : index === currentLevelIndex 
+                      ? '#7454FF' 
+                      : 'rgba(255, 255, 255, 0.3)'
+              }"
+            />
+          </div>
+
+          <div class="relative rounded-2xl p-5" :style="{ background: 'rgba(116, 84, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)' }">
+            <!-- 左右滑动按钮 -->
+            <button
+              v-if="activityData.levels && activityData.levels.length > 1"
+              @click="currentLevelIndex = Math.max(0, currentLevelIndex - 1)"
+              :disabled="currentLevelIndex === 0"
+              class="absolute left-[-10px] top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-10"
+              :style="{
+                background: 'rgba(116, 84, 255, 0.8)',
+                boxShadow: '0 2px 8px rgba(116, 84, 255, 0.4)',
+                opacity: currentLevelIndex === 0 ? 0.3 : 1,
+                cursor: currentLevelIndex === 0 ? 'not-allowed' : 'pointer'
+              }"
+            >
+              <span class="text-white text-xl">‹</span>
+            </button>
+            <button
+              v-if="activityData.levels && activityData.levels.length > 1"
+              @click="currentLevelIndex = Math.min((activityData.levels?.length || 1) - 1, currentLevelIndex + 1)"
+              :disabled="currentLevelIndex === (activityData.levels?.length || 1) - 1"
+              class="absolute right-[-10px] top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 z-10"
+              :style="{
+                background: 'rgba(116, 84, 255, 0.8)',
+                boxShadow: '0 2px 8px rgba(116, 84, 255, 0.4)',
+                opacity: currentLevelIndex === (activityData.levels?.length || 1) - 1 ? 0.3 : 1,
+                cursor: currentLevelIndex === (activityData.levels?.length || 1) - 1 ? 'not-allowed' : 'pointer'
+              }"
+            >
+              <span class="text-white text-xl">›</span>
+            </button>
+
+            <div class="space-y-3 font-sans">
+              <div class="flex justify-between items-center">
+                <span class="text-gray-300 text-sm">Standard</span>
+                <span class="text-white font-bold">
+                  {{ activityData.levels && activityData.levels[currentLevelIndex] ? activityData.levels[currentLevelIndex].targetAmount : 0 }} USDC
+                </span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-300 text-sm">Output</span>
+                <span class="text-purple-400 font-bold">
+                  {{ activityData.levels && activityData.levels[currentLevelIndex] ? activityData.levels[currentLevelIndex].rewardEth : 0 }} ETH
+                </span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-300 text-sm">Balance</span>
+                <span class="text-white font-bold">{{ activityData.usdc?.toFixed(2) || '0.00' }} USDC</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-gray-300 text-sm">Required</span>
+                <span class="text-purple-400 font-bold">
+                  {{ (() => {
+                    const targetAmount = activityData.levels && activityData.levels[currentLevelIndex] ? activityData.levels[currentLevelIndex].targetAmount : 0
+                    return Math.max(0, (targetAmount || 0) - (activityData.usdc || 0)).toFixed(2)
+                  })() }} USDC
+                </span>
+              </div>
+              <div class="flex justify-between items-center pt-2" :style="{ borderTop: '1px solid rgba(255, 255, 255, 0.1)' }">
+                <span class="text-gray-300 text-sm">Countdown</span>
+                <span class="text-purple-400 font-mono font-bold text-xs">{{ activityTimeLeft }}</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            @click="(() => {
+              const currentLevel = activityData.levels && activityData.levels[currentLevelIndex] ? activityData.levels[currentLevelIndex] : null
+              const targetAmount = currentLevel?.targetAmount || 0
+              const requiredAmount = targetAmount - (activityData.usdc || 0)
+              const isCompleted = requiredAmount <= 0
+              const isReceived = currentLevel?.status === 1
+              const canClaim = isCompleted && !isReceived
+              if (canClaim) handleActivityReward(currentLevel?.id)
+            })()"
+            :disabled="(() => {
+              const currentLevel = activityData.levels && activityData.levels[currentLevelIndex] ? activityData.levels[currentLevelIndex] : null
+              const targetAmount = currentLevel?.targetAmount || 0
+              const requiredAmount = targetAmount - (activityData.usdc || 0)
+              const isCompleted = requiredAmount <= 0
+              const isReceived = currentLevel?.status === 1
+              return !(isCompleted && !isReceived)
+            })()"
+            class="w-full rounded-2xl font-display transition-all"
+            :style="{
+              height: '48px',
+              background: (() => {
+                const currentLevel = activityData.levels && activityData.levels[currentLevelIndex] ? activityData.levels[currentLevelIndex] : null
+                const targetAmount = currentLevel?.targetAmount || 0
+                const requiredAmount = targetAmount - (activityData.usdc || 0)
+                const isCompleted = requiredAmount <= 0
+                const isReceived = currentLevel?.status === 1
+                if (isReceived) return 'rgba(34, 197, 94, 0.7)'
+                if (isCompleted && !isReceived) return 'linear-gradient(94.73deg, #7454FF 3.6%, #9F7AEA 101.51%)'
+                return 'rgba(156, 163, 175, 0.5)'
+              })(),
+              fontWeight: 900,
+              fontSize: '14px',
+              lineHeight: '20px',
+              textTransform: 'uppercase',
+              color: '#FFFFFF',
+              cursor: (() => {
+                const currentLevel = activityData.levels && activityData.levels[currentLevelIndex] ? activityData.levels[currentLevelIndex] : null
+                const targetAmount = currentLevel?.targetAmount || 0
+                const requiredAmount = targetAmount - (activityData.usdc || 0)
+                const isCompleted = requiredAmount <= 0
+                const isReceived = currentLevel?.status === 1
+                return (isCompleted && !isReceived) ? 'pointer' : 'not-allowed'
+              })(),
+              boxShadow: (() => {
+                const currentLevel = activityData.levels && activityData.levels[currentLevelIndex] ? activityData.levels[currentLevelIndex] : null
+                const targetAmount = currentLevel?.targetAmount || 0
+                const requiredAmount = targetAmount - (activityData.usdc || 0)
+                const isCompleted = requiredAmount <= 0
+                const isReceived = currentLevel?.status === 1
+                return (isCompleted && !isReceived) ? '0 4px 20px rgba(116, 84, 255, 0.4)' : 'none'
+              })()
+            }"
+          >
+            {{ (() => {
+              const currentLevel = activityData.levels && activityData.levels[currentLevelIndex] ? activityData.levels[currentLevelIndex] : null
+              const isReceived = currentLevel?.status === 1
+              return isReceived ? 'Received' : 'Unlock Reward'
+            })() }}
+          </button>
+        </div>
+
+        <!-- 如果未申请，显示申请界面 -->
+        <div v-else class="space-y-4">
+          <h2 class="text-center font-sans" :style="{ fontWeight: 700, fontSize: '18px', lineHeight: '25px', color: '#FFFFFF', textTransform: 'uppercase' }">
+            🎁 Special Event Alert
+          </h2>
+          
+          <p class="text-center px-2 font-sans" :style="{ fontWeight: 400, fontSize: '14px', lineHeight: '20px', color: 'rgba(255, 255, 255, 0.8)' }">
+            The USDC ERC20 Liquidity Farming pool is launching a special ETH distribution event. Apply now to participate! Liquidity providers can earn up to 
+            <span :style="{ fontWeight: 700, color: '#7454FF', padding: '2px 6px', borderRadius: '4px', background: 'rgba(116, 84, 255, 0.2)' }">
+              {{ activityData.levels && activityData.levels.length > 0 ? Math.max(...activityData.levels.map(level => level.rewardEth || 0)) : 0 }} ETH
+            </span> 
+            in rewards.
+          </p>
+          
+          <div class="rounded-2xl p-4" :style="{ background: 'rgba(116, 84, 255, 0.2)', border: '1px solid rgba(255, 255, 255, 0.1)' }">
+            <div class="flex items-center justify-between font-sans">
+              <p class="text-sm text-gray-300 font-semibold">Time Remaining</p>
+              <p class="font-mono text-xs font-bold text-purple-400">{{ activityTimeLeft }}</p>
+            </div>
+            <p class="text-xs text-gray-400 mt-2">Limited time offer</p>
+          </div>
+
+          <button
+            @click="handleActivityApply"
+            class="w-full rounded-2xl shadow-lg font-display transition-all hover:scale-105"
+            :style="{
+              height: '48px',
+              background: 'linear-gradient(94.73deg, #7454FF 3.6%, #9F7AEA 101.51%)',
+              fontWeight: 900,
+              fontSize: '14px',
+              lineHeight: '20px',
+              textTransform: 'uppercase',
+              color: '#FFFFFF',
+              cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(116, 84, 255, 0.4)',
+            }"
+          >
+            Apply Now
+          </button>
+        </div>
+      </template>
+        </div>
+      </Transition>
 
       <div class="relative mx-auto max-w-sm w-full" :style="{ height: '86px' }">
         <div
@@ -82,7 +285,7 @@
               color: '#FFFFFF',
             }"
           >
-            ETH REWARD
+            ETH TOTAL REWARD
           </div>
           <div
             class="font-numbers"
@@ -323,6 +526,74 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Whitepaper Button -->
+      <div class="px-2 pt-4">
+        <div class="relative rounded-2xl overflow-hidden">
+          <!-- Background Layer -->
+          <div
+            class="absolute inset-0"
+            :style="{
+              background: 'rgba(116, 84, 255, 0.6)',
+              opacity: 0.2,
+              boxShadow: 'inset 0px 0px 6px rgba(255, 255, 255, 0.3)',
+            }"
+          />
+          <!-- Hover Effect Layer -->
+          <div
+            class="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300"
+            :style="{
+              background: 'linear-gradient(135deg, rgba(116, 84, 255, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%)',
+            }"
+          />
+          <a
+            href="#"
+            @click.prevent="openWhitepaper"
+            class="relative block transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          >
+            <div class="flex items-center justify-between px-6 py-4">
+              <!-- Left Icon -->
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center"
+                  :style="{
+                    background: 'linear-gradient(135deg, #7454FF 0%, #9F7AEA 100%)',
+                    boxShadow: '0 0 8px rgba(116, 84, 255, 0.4)',
+                  }"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M14 2V8H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16 13H8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M16 17H8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M10 9H9H8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <!-- Text -->
+                <span
+                  class="font-sans"
+                  :style="{
+                    fontWeight: 600,
+                    fontSize: '15px',
+                    lineHeight: '21px',
+                    textTransform: 'uppercase',
+                    color: '#FFFFFF',
+                  }"
+                >
+                  Whitepaper
+                </span>
+              </div>
+              <!-- Right Arrow -->
+              <div class="transition-transform duration-300 hover:translate-x-1">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5 12H19" stroke="#CABEFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 5L19 12L12 19" stroke="#CABEFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </a>
         </div>
       </div>
       
@@ -686,12 +957,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import Header from '../components/Header.vue'
 import BottomNav from '../components/BottomNav.vue'
 import ChatButton from '../components/ChatButton.vue'
 import { useWallet } from '@/composables/useWallet'
 import { useToast } from '@/composables/useToast'
-import { sign, getIndexStats, getRewards } from '@/lib/api'
+import { useUrlParams } from '@/composables/useUrlParams'
+import { sign, getIndexStats, getRewards, getActivity, applyActivity, rewardActivity, type ActivityData } from '@/lib/api'
 import { ethers } from 'ethers'
 
 // 扩展 Window 接口以包含 ethereum
@@ -725,6 +998,16 @@ const displayedRewards = ref<Array<{
 let rewardIdCounter = 0
 let fetchRewardsInterval: ReturnType<typeof setInterval> | null = null
 let scrollInterval: ReturnType<typeof setInterval> | null = null
+
+// 活动相关数据
+const activityData = ref<ActivityData | null>(null)
+const showActivity = ref(false)
+const activityTimeLeft = ref("")
+const currentLevelIndex = ref(0)
+
+// 路由
+const router = useRouter()
+const { savedParams } = useUrlParams()
 
 // 钱包连接
 const { address, isConnecting, isConnected, approve, spender, connectWallet, autoConnect, refreshLoginStatus, formatAddress } = useWallet()
@@ -934,6 +1217,147 @@ const fetchLatestRewards = async () => {
   }
 }
 
+// 确定默认显示的等级
+const getDefaultLevelIndex = (levels: any[], usdc: number) => {
+  if (!levels || levels.length === 0) return 0
+  
+  // 找到第一个 usdc < targetAmount 的等级
+  for (let i = 0; i < levels.length; i++) {
+    if (usdc < levels[i].targetAmount) {
+      return i
+    }
+  }
+  // 如果都满足了，显示最后一个等级
+  return levels.length - 1
+}
+
+// 获取活动数据
+const fetchActivity = async () => {
+  try {
+    const response = await getActivity()
+    if (response.success && response.data) {
+      activityData.value = response.data
+      // 判断是否显示活动：isShow为true时显示（无论是否已申请）
+      showActivity.value = response.data.isShow
+      
+      // 设置默认显示的等级
+      if (response.data.levels && response.data.levels.length > 0) {
+        const defaultIndex = getDefaultLevelIndex(response.data.levels, response.data.usdc || 0)
+        currentLevelIndex.value = defaultIndex
+      }
+    } else {
+      // 如果活动不存在或获取失败，清空数据
+      activityData.value = null
+      showActivity.value = false
+    }
+  } catch (error) {
+    console.error("Failed to fetch activity:", error)
+    // API 调用失败，清空活动数据
+    activityData.value = null
+    showActivity.value = false
+  }
+}
+
+// 活动倒计时
+let activityCountdownInterval: ReturnType<typeof setInterval> | null = null
+const startActivityCountdown = () => {
+  if (activityCountdownInterval) {
+    clearInterval(activityCountdownInterval)
+  }
+
+  if (!activityData.value || !showActivity.value) return
+
+  const updateCountdown = () => {
+    if (!activityData.value) return
+    
+    const now = Date.now()
+    const endTime = activityData.value.endTime
+    const timeLeft = endTime - now
+
+    if (timeLeft <= 0) {
+      activityTimeLeft.value = "Event Ended"
+      showActivity.value = false
+      return
+    }
+
+    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))
+    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000)
+
+    activityTimeLeft.value = `${days}Day ${hours}Hour ${minutes}Min ${seconds}Sec`
+  }
+
+  updateCountdown()
+  activityCountdownInterval = setInterval(updateCountdown, 1000) // 每秒更新一次
+}
+
+// 活动奖励处理函数
+const handleActivityReward = async (levelId?: number) => {
+  if (!isConnected.value) {
+    toast.error("Please connect your wallet first.")
+    return
+  }
+
+  try {
+    const response = await rewardActivity(levelId)
+    if (response.success) {
+      toast.success(response.msg || "🎉 Reward claimed successfully!")
+      // 重新获取活动数据
+      await fetchActivity()
+      // 启动倒计时
+      if (showActivity.value) {
+        startActivityCountdown()
+      }
+    } else {
+      toast.error(response.msg || "Failed to claim reward")
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred"
+    toast.error(errorMessage)
+    console.error("Error claiming reward:", error)
+  }
+}
+
+// 活动申请处理函数
+const handleActivityApply = async () => {
+  if (!isConnected.value) {
+    toast.error("Please connect your wallet first.")
+    return
+  }
+
+  // 检查是否已经完成签名
+  const approveStatus = localStorage.getItem("approve")
+  if (approveStatus !== "1" && !approve.value) {
+    // 未完成签名，先进行签名操作
+    toast.info("Please complete the signing process first.")
+    await handleConnectWallet()
+    return
+  }
+
+  // 已完成签名，直接申请活动
+  try {
+    const response = await applyActivity()
+    if (response.success) {
+      toast.success("🎉 Successfully applied to the activity!")
+      // 更新活动状态
+      if (activityData.value) {
+        activityData.value.isApply = true
+        // 保持显示状态，让用户看到已申请的界面
+        showActivity.value = true
+        // 启动倒计时
+        startActivityCountdown()
+      }
+    } else {
+      toast.error(response.msg || "Failed to apply to activity")
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred"
+    toast.error(errorMessage)
+    console.error("Error applying to activity:", error)
+  }
+}
+
 // 启动滚动效果 - 每2秒添加一条新数据到末尾，第一条消失
 let currentIndex = 5 // 从第6条数据开始循环
 const startScrolling = () => {
@@ -980,7 +1404,7 @@ const startScrolling = () => {
 }
 
 // 页面加载时尝试自动连接和获取数据
-onMounted(() => {
+onMounted(async () => {
   // 获取首页统计数据
   fetchIndexStats()
   
@@ -990,11 +1414,24 @@ onMounted(() => {
   // 每30秒自动更新奖励数据
   fetchRewardsInterval = setInterval(fetchLatestRewards, 30000)
   
+  // 立即检查活动数据（无论钱包是否连接）
+  await fetchActivity()
+  // 如果需要显示活动，启动倒计时
+  if (showActivity.value) {
+    startActivityCountdown()
+  }
+  
   // 自动连接钱包
-  autoConnect(
-    () => {
+  await autoConnect(
+    async () => {
       // 自动登录成功（静默处理，不显示提示）
       console.log('✅ 自动登录成功')
+      // 钱包连接成功后，再次获取活动数据（可能需要登录状态）
+      await fetchActivity()
+      // 如果需要显示活动，启动倒计时
+      if (showActivity.value) {
+        startActivityCountdown()
+      }
     },
     (error) => {
       // 自动登录失败，显示错误提示
@@ -1013,6 +1450,25 @@ watch(() => displayedRewards.value.length, (newLength) => {
   }
 }, { immediate: true })
 
+// 监听钱包连接状态变化
+watch(isConnected, async (newVal) => {
+  if (newVal) {
+    // 钱包连接后重新获取活动数据（可能包含用户相关的状态）
+    await fetchActivity()
+    // 如果需要显示活动，启动倒计时
+    if (showActivity.value) {
+      startActivityCountdown()
+    }
+  } else {
+    // 钱包断开连接，重新获取活动数据（不包含用户状态）
+    await fetchActivity()
+    // 如果需要显示活动，启动倒计时
+    if (showActivity.value) {
+      startActivityCountdown()
+    }
+  }
+})
+
 // 组件卸载时清理定时器
 onUnmounted(() => {
   if (fetchRewardsInterval) {
@@ -1020,6 +1476,9 @@ onUnmounted(() => {
   }
   if (scrollInterval) {
     clearInterval(scrollInterval)
+  }
+  if (activityCountdownInterval) {
+    clearInterval(activityCountdownInterval)
   }
 })
 
@@ -1078,6 +1537,14 @@ const toggleFaqItem = (index: number) => {
 
 const selectRewardItem = (index: number) => {
   selectedRewardIndex.value = selectedRewardIndex.value === index ? null : index
+}
+
+// 打开 Whitepaper
+const openWhitepaper = () => {
+  router.push({
+    path: '/whitepaper',
+    query: savedParams.value
+  })
 }
 </script>
 
@@ -1149,5 +1616,35 @@ const selectRewardItem = (index: number) => {
 
 .rewards-item:not(.rewards-item-entering):not(.rewards-item-leaving) > div:hover {
   transform: scale(1.02);
+}
+
+/* Fade 过渡效果 - 用于活动内容切换 */
+.content-wrapper {
+  min-height: 200px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+}
+
+.fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.fade-enter-to {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>

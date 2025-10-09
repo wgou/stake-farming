@@ -9,13 +9,18 @@
 import { onMounted } from 'vue'
 import { checkReferralCode } from '@/lib/api'
 import { useToast } from '@/composables/useToast'
+import { useUrlParams } from '@/composables/useUrlParams'
 import Toast from '@/components/Toast.vue'
 
 const toast = useToast()
+const { initializeParams } = useUrlParams()
 
 // 在应用启动时检查 URL 中的 code 参数
 onMounted(async () => {
   try {
+    // 初始化并保存 URL 参数（用于后续页面导航）
+    initializeParams()
+    
     // 获取 URL 中的查询参数
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')

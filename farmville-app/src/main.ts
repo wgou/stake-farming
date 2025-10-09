@@ -10,6 +10,7 @@ import TransactionPage from './pages/TransactionPage.vue'
 import SharePage from './pages/SharePage.vue'
 import AccountPage from './pages/AccountPage.vue'
 import ChatPage from './pages/ChatPage.vue'
+import WhitepaperPage from './pages/WhitepaperPage.vue'
 
 const routes = [
   { path: '/', component: HomePage },
@@ -17,6 +18,7 @@ const routes = [
   { path: '/share', component: SharePage },
   { path: '/account', component: AccountPage },
   { path: '/chat', component: ChatPage },
+  { path: '/whitepaper', component: WhitepaperPage },
 ]
 
 const router = createRouter({

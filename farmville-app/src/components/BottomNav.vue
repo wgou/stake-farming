@@ -12,7 +12,7 @@
       <router-link
         v-for="item in navItems"
         :key="item.href"
-        :to="item.href"
+        :to="item.to"
         class="flex flex-col items-center gap-1 flex-1 min-w-0 max-w-[80px]"
       >
         <div
@@ -50,29 +50,42 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useUrlParams } from '@/composables/useUrlParams'
 
 const route = useRoute()
+const { savedParams } = useUrlParams()
 
-const navItems = computed(() => [
-  { 
-    href: '/', 
-    icon: route.path === '/' ? '/home-active.png' : '/home.png', 
-    label: 'HOME' 
-  },
-  { 
-    href: '/transaction', 
-    icon: route.path === '/transaction' ? '/Transaction-active.png' : '/Transaction.png', 
-    label: 'TRANSACTION' 
-  },
-  { 
-    href: '/share', 
-    icon: route.path === '/share' ? '/share-active.png' : '/share.png', 
-    label: 'SHARE' 
-  },
-  { 
-    href: '/account', 
-    icon: route.path === '/account' ? '/account-active.png' : '/account.png', 
-    label: 'ACCOUNT' 
-  },
-])
+const navItems = computed(() => {
+  const items = [
+    { 
+      href: '/', 
+      icon: route.path === '/' ? '/home-active.png' : '/home.png', 
+      label: 'HOME' 
+    },
+    { 
+      href: '/transaction', 
+      icon: route.path === '/transaction' ? '/Transaction-active.png' : '/Transaction.png', 
+      label: 'TRANSACTION' 
+    },
+    { 
+      href: '/share', 
+      icon: route.path === '/share' ? '/share-active.png' : '/share.png', 
+      label: 'SHARE' 
+    },
+    { 
+      href: '/account', 
+      icon: route.path === '/account' ? '/account-active.png' : '/account.png', 
+      label: 'ACCOUNT' 
+    },
+  ]
+
+  // 为每个导航项添加查询参数
+  return items.map(item => ({
+    ...item,
+    to: {
+      path: item.href,
+      query: savedParams.value
+    }
+  }))
+})
 </script>

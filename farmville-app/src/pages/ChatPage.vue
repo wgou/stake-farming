@@ -60,14 +60,15 @@
                   class="max-w-full rounded-md max-h-48 object-contain cursor-pointer"
                   @click="openImage(msg.content.content)"
                 />
-                <p v-if="msg.time" class="text-[11px] mt-2 opacity-50" style="color: #CABEFF; font-family: 'PingFang HK';">{{ msg.time }}</p>
               </div>
+              <!-- Relative Time Display -->
+              <p v-if="msg.time" class="text-[10px] mt-1 opacity-50 ml-1" style="color: #CABEFF; font-family: 'PingFang HK';">{{ getRelativeTime(msg.time) }}</p>
             </div>
           </div>
 
           <!-- User Message -->
           <div v-else class="flex items-start gap-3 justify-end mb-4">
-            <div class="flex justify-end flex-1">
+            <div class="flex flex-col items-end flex-1">
               <div class="rounded-lg p-3 inline-block message-right" style="background: linear-gradient(135deg, #9F7AEA 0%, #C9BDFE 100%); max-width: 280px; box-shadow: 0 0 4px 0 rgba(159, 122, 234, 0.3);">
                 <!-- Text Message -->
                 <p v-if="msg.content.type === 'text'" class="text-[14px] font-medium text-white break-words whitespace-pre-wrap" style="font-family: 'PingFang HK';">{{ msg.content.content }}</p>
@@ -80,6 +81,8 @@
                   @click="openImage(msg.content.content)"
                 />
               </div>
+              <!-- Relative Time Display -->
+              <p v-if="msg.time" class="text-[10px] mt-1 opacity-50 mr-1" style="color: #CABEFF; font-family: 'PingFang HK';">{{ getRelativeTime(msg.time) }}</p>
             </div>
             <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" style="background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-white">
@@ -163,6 +166,7 @@ import BottomNav from '../components/BottomNav.vue'
 import Toast from '../components/Toast.vue'
 import { useToast } from '@/composables/useToast'
 import { useWallet } from '@/composables/useWallet'
+import { useUnreadMessages } from '@/composables/useUnreadMessages'
 import { getWalletData, getMessage, uploadImage } from '@/lib/api'
 
 // Types
@@ -204,6 +208,7 @@ interface HistoryMessage {
 const router = useRouter()
 const toast = useToast()
 const { isConnected } = useWallet()
+const { unreadCount } = useUnreadMessages()
 
 // State
 const message = ref('')
@@ -232,6 +237,40 @@ let heartbeatInterval: NodeJS.Timeout | null = null
 function getCurrentTime(): string {
   const now = new Date()
   return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+// Get relative time (e.g., "1 minute ago", "2 hours ago")
+function getRelativeTime(timeString: string): string {
+  try {
+    // Parse the time string (HH:MM format)
+    const [hours, minutes] = timeString.split(':').map(Number)
+    const now = new Date()
+    const messageTime = new Date()
+    messageTime.setHours(hours, minutes, 0, 0)
+    
+    // If message time is in the future (crossed midnight), subtract a day
+    if (messageTime > now) {
+      messageTime.setDate(messageTime.getDate() - 1)
+    }
+    
+    const diffMs = now.getTime() - messageTime.getTime()
+    const diffSeconds = Math.floor(diffMs / 1000)
+    const diffMinutes = Math.floor(diffSeconds / 60)
+    const diffHours = Math.floor(diffMinutes / 60)
+    const diffDays = Math.floor(diffHours / 24)
+    
+    if (diffSeconds < 60) {
+      return 'Just now'
+    } else if (diffMinutes < 60) {
+      return diffMinutes === 1 ? '1 minute ago' : `${diffMinutes} minutes ago`
+    } else if (diffHours < 24) {
+      return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`
+    } else {
+      return diffDays === 1 ? '1 day ago' : `${diffDays} days ago`
+    }
+  } catch (error) {
+    return ''
+  }
 }
 
 // Fetch chat history
@@ -563,6 +602,10 @@ watch(chatHistory, () => {
 
 // Initialize on mount
 onMounted(() => {
+  // 重置未读消息计数
+  unreadCount.value = 0
+  console.log('📭 已进入聊天页面，未读消息计数已重置')
+  
   if (isConnected.value) {
     initializeChat()
   }
