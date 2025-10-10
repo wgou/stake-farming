@@ -974,7 +974,7 @@ declare global {
   }
 }
 
-const activeTab = ref<'rewards' | 'faq'>('faq')
+const activeTab = ref<'rewards' | 'faq'>('rewards')
 const expandedFaqItems = ref<number[]>([])
 const selectedRewardIndex = ref<number | null>(null)
 

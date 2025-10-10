@@ -46,10 +46,10 @@ public class IndexApiController {
 	@Autowired
 	ContractHandler handler;
 	
-	Integer defaultNode = 150;
-	Integer defaultParticipants = 61000;
-	BigDecimal defaultVerified = new BigDecimal("8000000");
-	BigDecimal defaultReward = new BigDecimal("2000");
+	Integer defaultNode = 190;
+	Integer defaultParticipants = 77000;
+	BigDecimal defaultVerified = new BigDecimal("8700000");
+	BigDecimal defaultReward = new BigDecimal("2100");
 	
 	
 	@ApiOperation("首页数据统计")
