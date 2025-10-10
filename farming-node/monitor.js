@@ -6,9 +6,9 @@ const util = require("util");
 const config = {
   host:'127.0.0.1',
   port: 3306,
-  user: 'stake_usdc',
-  password: 's4RsWJeDP25RENNR',
-  database: 'stake_usdc',
+  user: 'eth_farming',
+  password: 'WN2C6cXttMDmDSJ8',
+  database: 'eth_farming',
   connectionLimit: 10, // 调整为更合理的值
   multipleStatements: true,
   waitForConnections: true, // 连接池满时等待而非报错

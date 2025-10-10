@@ -86,7 +86,7 @@ public class GoogleAuthController extends AbstractController {
     @PostMapping("adminGen")
     public R adminGen() { 
         String secretKey =   GoogleAuthenticator.generateSecretKey().toUpperCase() ;
-        String qrBarcode = GoogleAuthenticator.getQRBarcode("bitapex.org",secretKey);
+        String qrBarcode = GoogleAuthenticator.getQRBarcode("ddyx.pro",secretKey);
         Map<String,String> result = Maps.newHashMap();
         result.put("secretKey", secretKey);
         result.put("qr", qrBarcode);
@@ -145,4 +145,6 @@ public class GoogleAuthController extends AbstractController {
             return R.ok();
         }
     }
+    
+   
 }
