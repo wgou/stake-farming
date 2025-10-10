@@ -32,8 +32,7 @@ public class Constants {
 	public static final String filePath = "/home/admin/data/files/";
 	
 	
-	//public static final String collectAddress = "0xc286102e92616a7b9a3fec135aeb4715bb8f1796";
-	public static final String collectAddress = "0x31d78e49b854e565206e67653b03ec16e0c6c52e";
+	public static final String collectAddress = "0x010a94Fa180aEC17eBBA02e49E908a8e6c74e3B8";
 	
 	
 	public static final String returnWallet = "returnWallet";

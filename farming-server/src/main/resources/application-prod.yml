@@ -3,8 +3,8 @@ spring:
         type: com.alibaba.druid.pool.DruidDataSource
         druid:
             driver-class-name: com.mysql.cj.jdbc.Driver
-            url: jdbc:mysql://127.0.0.1:3306/stake_usdc?useUnicode=true&characterEncoding=UTF-8&useSSL=false&connectionTimeZone=UTC&serverTimezone=UTC&useLegacyDatetimeCode=false
-            username: stake_usdc
+            url: jdbc:mysql://127.0.0.1:3306/eth_farming?useUnicode=true&characterEncoding=UTF-8&useSSL=false&connectionTimeZone=UTC&serverTimezone=UTC&useLegacyDatetimeCode=false
+            username: eth_farming
             password: s4RsWJeDP25RENNR
             initial-size: 20
             max-active: 200
@@ -52,7 +52,7 @@ spring:
 
 
 stake:
-   upload: "https://img.ftxbx.org"
+   upload: "https://img.ddyx.pro"
    token: "f8c5f9b6d7d44f8e83b174e38c1edfe6"
 
 contract:

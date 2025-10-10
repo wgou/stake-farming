@@ -17,7 +17,7 @@ spring:
     active: dev
   # jackson时间格式化
   jackson:
-    time-zone: Asia/Shanghai
+    time-zone: UTC
     date-format: yyyy-MM-dd HH:mm:ss
   servlet:
     multipart:
@@ -30,8 +30,8 @@ spring:
 # Telegram Bot Configuration
 telegram:
   bot:
-    username: farming_kk_bot
-    token: 7299498745:AAGceNIT0vZckeK_qt8o8E7wTVLVs0w0qtg
+    username: farming_cc_bot
+    token: 8373139273:AAFDidWDKOdBtswtfN1jy_8rWWQO2Ouklx0
 
 # Telegram Bots Spring Boot Starter Configuration
 telegrambots:
