@@ -15,7 +15,7 @@ const getApiBaseUrl = (): string => {
   
   if (typeof window === 'undefined') {
     // 服务端渲染时使用默认值
-    return 'https://index.cloudko.org/stake'
+    return 'https://ddyx.pro/stake'
   }
   // 浏览器环境中使用当前域名
   return `${window.location.protocol}//${window.location.host}/stake`

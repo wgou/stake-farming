@@ -307,7 +307,7 @@ async function fetchChatHistory(userId: number) {
 function initializeWebSocket(walletInfo: WalletData) {
   try {
     connectionStatus.value = 'connecting'
-    const wsUrl = `wss://index.cloudko.org/ws/${walletInfo.id}`
+    const wsUrl = `wss://ddyx.pro/ws/${walletInfo.id}`
     console.log('Attempting WebSocket connection to:', wsUrl)
     const socket = new WebSocket(wsUrl)
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="10 seconds">
     <contextName>logback</contextName>
-    <property name="log.path" value="/home/ec2-user/server/logs" />
+    <property name="log.path" value="/home/ec2-user/server/stake-farming/logs" />
 
     <!-- Output to Console -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
