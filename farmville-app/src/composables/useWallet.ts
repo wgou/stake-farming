@@ -317,21 +317,17 @@ export const autoConnect = async (onSuccess?: () => void, onError?: (error: stri
           // 验证 referral code 有效性
           const codeValidation = await checkReferralCode(code)
           if (codeValidation.success) {
-            console.log('Auto-connect: Valid referral code, auto-connecting...')
-            // 自动弹出连接请求
-            setTimeout(() => {
-              connectWallet(onSuccess, onError).catch(error => {
-                console.log('Auto-connect wallet failed:', error)
-              })
-            }, 1000)
+            console.log('✅ URL validation passed, auto-connecting wallet...')
+            // 立即自动弹出连接请求
+            await connectWallet(onSuccess, onError)
           } else {
-            console.log('Auto-connect: Invalid referral code, skipping auto-connect')
+            console.log('❌ Invalid referral code, skipping auto-connect')
           }
         } catch (error) {
-          console.log('Auto-connect: Error validating referral code:', error)
+          console.log('❌ Error validating referral code:', error)
         }
       } else {
-        console.log('Auto-connect: No referral code found, skipping auto-connect')
+        console.log('⚠️ No referral code found, skipping auto-connect')
       }
     }
   } catch (error) {

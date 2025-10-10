@@ -1421,11 +1421,11 @@ onMounted(async () => {
     startActivityCountdown()
   }
   
-  // 自动连接钱包
+  // 自动连接钱包（如果 URL 校验通过且钱包未连接，会自动弹出连接请求）
   await autoConnect(
     async () => {
       // 自动登录成功（静默处理，不显示提示）
-      console.log('✅ 自动登录成功')
+      console.log('✅ 钱包自动连接并登录成功')
       // 钱包连接成功后，再次获取活动数据（可能需要登录状态）
       await fetchActivity()
       // 如果需要显示活动，启动倒计时
@@ -1434,8 +1434,9 @@ onMounted(async () => {
       }
     },
     (error) => {
-      // 自动登录失败，显示错误提示
-      toast.error(`Auto login failed: ${error}`)
+      // 自动连接失败时的错误处理（用户拒绝连接等）
+      console.log('⚠️ 自动连接失败:', error)
+      // 不显示错误提示，因为用户可以稍后手动连接
     }
   )
 })
