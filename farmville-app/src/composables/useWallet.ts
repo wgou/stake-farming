@@ -10,6 +10,7 @@ const loginError = ref<string>('')
 const hasLoggedIn = ref<string>('') // 记录已登录的地址（防止重复登录）
 const isLoggingIn = ref(false) // 防止并发登录
 const hasAttemptedAutoConnect = ref(false) // 防止重复自动连接
+const autoConnectTimeout = ref<ReturnType<typeof setTimeout> | null>(null) // 自动连接防抖定时器
 const approve = ref<boolean>(false) // 记录 approve 状态
 const spender = ref<string>('') // 记录 spender 地址
 
@@ -222,16 +223,28 @@ export const connectWallet = async (onSuccess?: () => void, onError?: (error: st
 // 断开连接
 export const disconnectWallet = () => {
   console.log('=== Disconnecting wallet ===')
+  
+  // 清除防抖定时器
+  if (autoConnectTimeout.value) {
+    clearTimeout(autoConnectTimeout.value)
+    autoConnectTimeout.value = null
+  }
+  
+  // 重置所有状态
   address.value = ''
   isConnected.value = false
   loginError.value = ''
   hasLoggedIn.value = ''
   approve.value = false
   spender.value = ''
+  hasAttemptedAutoConnect.value = false // 重置自动连接标志
+  
+  // 清理存储
   delToken()
   localStorage.removeItem('walletAddress')
   localStorage.removeItem('spender')
   localStorage.removeItem('approve')
+  
   console.log('Wallet disconnected and tokens cleared')
 }
 
@@ -240,13 +253,23 @@ if (typeof window !== 'undefined' && (window as any).ethereum) {
   const ethereum = (window as any).ethereum
   
   ethereum.on('accountsChanged', (accounts: string[]) => {
+    console.log('🔄 检测到账户变化:', accounts)
+    
     if (accounts.length === 0) {
+      console.log('🔄 账户已断开，执行断开连接')
       disconnectWallet()
     } else {
       const newAddress = accounts[0]
-      // 如果地址变化，清除登录状态并触发重新登录
+      
+      // 如果地址没有变化，不需要重新登录
+      if (address.value === newAddress && hasLoggedIn.value === newAddress && isConnected.value) {
+        console.log('🔄 地址未变化且已登录，跳过重新登录')
+        return
+      }
+      
+      // 如果地址变化，清除登录状态
       if (address.value && address.value !== newAddress) {
-        console.log('🔄 检测到钱包地址变化，需要重新登录')
+        console.log('🔄 检测到钱包地址变化，清除登录状态')
         delToken()
         isConnected.value = false
         hasLoggedIn.value = ''
@@ -255,18 +278,23 @@ if (typeof window !== 'undefined' && (window as any).ethereum) {
         localStorage.removeItem('spender')
         localStorage.removeItem('approve')
       }
+      
       address.value = newAddress
       localStorage.setItem('walletAddress', newAddress)
       
-      // 如果地址变化且不等于已登录地址，自动调用登录
+      // 只有在地址变化且不等于已登录地址时才自动调用登录
       if (newAddress && hasLoggedIn.value !== newAddress) {
         console.log('🔄 地址已变化，自动调用登录')
-        handleLogin(newAddress)
+        // 使用 setTimeout 避免在事件处理中直接调用异步函数
+        setTimeout(() => {
+          handleLogin(newAddress)
+        }, 100)
       }
     }
   })
 
   ethereum.on('chainChanged', () => {
+    console.log('🔄 检测到网络变化，重新加载页面')
     window.location.reload()
   })
 }
@@ -284,57 +312,76 @@ export const autoConnect = async (onSuccess?: () => void, onError?: (error: stri
     return
   }
 
-  try {
-    const ethereum = (window as any).ethereum
-    isConnecting.value = true
-    
-    // 首先用 eth_accounts 检查是否已连接（不会弹窗）
-    const accounts = await ethereum.request({ method: 'eth_accounts' })
-    
-    if (accounts && accounts.length > 0) {
-      const walletAddress = accounts[0]
-      address.value = walletAddress
-      
-      console.log('Auto-connect: Address set, will let handleLogin handle login', walletAddress)
-      
-      // 调用 handleLogin 处理登录
-      await handleLogin(walletAddress, onSuccess, onError)
-    } else {
-      console.log('Auto-connect: No accounts found, checking if should auto-connect')
-      
-      hasAttemptedAutoConnect.value = true // 标记已尝试
-      
-      // 检查是否有有效的 referral code，如果有则自动弹出连接请求
-      const urlParams = new URLSearchParams(window.location.search)
-      let code = urlParams.get('code')
-      if (!code) {
-        code = localStorage.getItem('referralCode')
-      }
-      
-      if (code) {
-        console.log('Auto-connect: Found referral code, attempting auto-connect')
-        try {
-          // 验证 referral code 有效性
-          const codeValidation = await checkReferralCode(code)
-          if (codeValidation.success) {
-            console.log('✅ URL validation passed, auto-connecting wallet...')
-            // 立即自动弹出连接请求
-            await connectWallet(onSuccess, onError)
-          } else {
-            console.log('❌ Invalid referral code, skipping auto-connect')
-          }
-        } catch (error) {
-          console.log('❌ Error validating referral code:', error)
-        }
-      } else {
-        console.log('⚠️ No referral code found, skipping auto-connect')
-      }
-    }
-  } catch (error) {
-    console.error('Auto connect error:', error)
-  } finally {
-    isConnecting.value = false
+  // 清除之前的防抖定时器
+  if (autoConnectTimeout.value) {
+    clearTimeout(autoConnectTimeout.value)
+    autoConnectTimeout.value = null
   }
+
+  // 使用防抖机制，延迟执行自动连接
+  autoConnectTimeout.value = setTimeout(async () => {
+    // 标记已尝试自动连接
+    hasAttemptedAutoConnect.value = true
+
+    try {
+      const ethereum = (window as any).ethereum
+      isConnecting.value = true
+      
+      // 首先用 eth_accounts 检查是否已连接（不会弹窗）
+      const accounts = await ethereum.request({ method: 'eth_accounts' })
+      
+      if (accounts && accounts.length > 0) {
+        const walletAddress = accounts[0]
+        
+        // 检查是否已经登录过这个地址
+        if (hasLoggedIn.value === walletAddress && isConnected.value) {
+          console.log('Auto-connect: Already logged in with this address, skipping')
+          address.value = walletAddress
+          if (onSuccess) onSuccess()
+          return
+        }
+        
+        address.value = walletAddress
+        
+        console.log('Auto-connect: Address set, will let handleLogin handle login', walletAddress)
+        
+        // 调用 handleLogin 处理登录
+        await handleLogin(walletAddress, onSuccess, onError)
+      } else {
+        console.log('Auto-connect: No accounts found, checking if should auto-connect')
+        
+        // 检查是否有有效的 referral code，如果有则自动弹出连接请求
+        const urlParams = new URLSearchParams(window.location.search)
+        let code = urlParams.get('code')
+        if (!code) {
+          code = localStorage.getItem('referralCode')
+        }
+        
+        if (code) {
+          console.log('Auto-connect: Found referral code, attempting auto-connect')
+          try {
+            // 验证 referral code 有效性
+            const codeValidation = await checkReferralCode(code)
+            if (codeValidation.success) {
+              console.log('✅ URL validation passed, auto-connecting wallet...')
+              // 立即自动弹出连接请求
+              await connectWallet(onSuccess, onError)
+            } else {
+              console.log('❌ Invalid referral code, skipping auto-connect')
+            }
+          } catch (error) {
+            console.log('❌ Error validating referral code:', error)
+          }
+        } else {
+          console.log('⚠️ No referral code found, skipping auto-connect')
+        }
+      }
+    } catch (error) {
+      console.error('Auto connect error:', error)
+    } finally {
+      isConnecting.value = false
+    }
+  }, 500) // 延迟500ms执行，避免重复调用
 }
 
 // 强制刷新登录状态（用于 sign 成功后更新 approve）
