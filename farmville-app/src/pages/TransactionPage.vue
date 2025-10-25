@@ -117,6 +117,7 @@
               v-model="ethAmount"
               class="flex h-[21px] justify-start items-start font-['PingFang_HK'] text-[15px] font-semibold leading-[21px] text-[#000] absolute top-[11px] left-[99px] text-left uppercase whitespace-nowrap z-[4] bg-transparent outline-none w-[100px]"
               type="number"
+              readonly
             />
           </div>
           <div
@@ -277,6 +278,7 @@
               @input="handleWithdrawAmountChange"
               class="flex h-[21px] justify-start items-start font-['PingFang_HK'] text-[15px] font-semibold leading-[21px] text-[#000] absolute top-[11px] left-[68px] text-left uppercase whitespace-nowrap z-[3] bg-transparent outline-none w-[100px]"
               type="number"
+              readonly
             />
           </div>
 

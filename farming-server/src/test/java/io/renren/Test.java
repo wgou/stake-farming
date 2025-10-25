@@ -89,8 +89,9 @@ public class Test extends BaseTest{
 //			String salt = RandomStringUtils.randomAlphanumeric(20);
 //			System.out.println(salt);
 //			System.out.println(new Sha256Hash("123456", salt).toHex());
-//			
-			testAddr();
+//			syso
+			
+			System.out.println(AESUtils.decrypt("FB64C812180C86A8EB14BA5CCFB7F59E8167EA604D9F23D7D68670A589FEE019"));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
