@@ -351,7 +351,7 @@
                 color: '#FFFFFF',
               }"
             >
-              {{ indexStats.participants.toLocaleString() }}
+              {{ indexStats.participants}}
             </div>
           </div>
         </div>
@@ -403,7 +403,7 @@
                 color: '#FFFFFF',
               }"
             >
-              {{ indexStats.nodes.toLocaleString() }}
+              {{ indexStats.nodes}}
             </div>
           </div>
         </div>

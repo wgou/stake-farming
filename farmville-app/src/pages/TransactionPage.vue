@@ -454,7 +454,7 @@ const fetchWalletData = async () => {
     const response = await getWalletIndex()
     if (response.success && response.data) {
       // 设置可兑换的 ETH 余额
-      ethBalance.value = response.data.exchangeable.toLocaleString()
+      ethBalance.value = response.data.exchangeable
  
       console.log('✅ 钱包数据加载成功:', response.data)
       console.log('可兑换 ETH 余额:', response.data.exchangeable)
