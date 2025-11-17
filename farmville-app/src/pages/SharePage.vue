@@ -18,7 +18,7 @@
 
         <!-- Description -->
         <p class="text-center leading-[20px] text-[#FFFFFF]" style="font-family: 'PingFang HK'; font-style: normal; font-weight: 600; font-size: 14px; text-transform: capitalize; opacity: 0.9; margin-top: 8px;">
-          Share Your Referral Link With Friends And Earn 38% Of Their Rewards
+          Share Your Referral Link With Friends And Earn 30% Of Their Rewards
         </p>
 
         <!-- Reward Rate Display -->
