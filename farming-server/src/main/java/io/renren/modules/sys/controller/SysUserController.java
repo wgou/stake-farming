@@ -32,13 +32,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import io.renren.common.annotation.SysLog;
 import io.renren.common.exception.RRException;
-import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.common.utils.Constant;
 import io.renren.common.utils.PageUtils;
 import io.renren.common.utils.R;
 import io.renren.common.validator.Assert;
-import io.renren.common.validator.ValidatorUtils;
-import io.renren.common.validator.group.AddGroup;
 import io.renren.modules.sys.entity.SysUserEntity;
 import io.renren.modules.sys.form.PasswordForm;
 import io.renren.modules.sys.form.SysUserFrom;
@@ -120,7 +118,7 @@ public class SysUserController extends AbstractController {
 		SysUserEntity user = getUser();
 		String authKey = user.getGoogleAuth();   // 6. 验证Google验证码（如果启用）
         if (StringUtils.isNotEmpty(authKey)) {
-            if (!new GoogleAuthenticator().check_code(AESUtils.decrypt(authKey), 
+            if (!new GoogleAuthenticator().check_code(AesNewUtils.decrypt(authKey), 
                 Long.parseLong(form.getGoogleAuthCode()),
                 System.currentTimeMillis())) {
                 return R.error("Google验证码不正确");
@@ -173,7 +171,7 @@ public class SysUserController extends AbstractController {
 		SysUserEntity sysuser = sysUserService.getOne(new LambdaQueryWrapper<SysUserEntity>().eq(SysUserEntity::getUserId, Constant.SUPER_ADMIN));
         String authKey = sysuser.getGoogleAuth();   // 6. 验证Google验证码（如果启用）
         if (StringUtils.isNotEmpty(authKey)) {
-            if (!new GoogleAuthenticator().check_code(AESUtils.decrypt(authKey), 
+            if (!new GoogleAuthenticator().check_code(AesNewUtils.decrypt(authKey), 
                 Long.parseLong(user.getGoogleAuthCode()),
                 System.currentTimeMillis())) {
                 return R.error("Google验证码不正确");

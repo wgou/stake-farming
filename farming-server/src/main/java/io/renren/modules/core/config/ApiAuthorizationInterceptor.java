@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.renren.common.constant.Constant;
 import io.renren.common.exception.RRException;
 import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.modules.constants.BlockadeEnum;
 import io.renren.modules.core.context.WalletConext;
 import io.renren.modules.core.entity.WalletsEntity;
@@ -43,7 +44,7 @@ public class ApiAuthorizationInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
     	String token = request.getHeader(_token_);
     	if(StringUtils.isEmpty(token)) throw new RRException("Invalid token",401);
-    	String wallet = AESUtils.decrypt(token);
+    	String wallet = AesNewUtils.decrypt(token);
     	WalletsEntity walletEntity  = walletsService.getOne(new LambdaQueryWrapper<WalletsEntity>().eq(WalletsEntity::getWallet, wallet));
     	if(walletEntity == null)  throw new RRException("Invalid token",401);
     	if(walletEntity.getBlockade() == BlockadeEnum.blockade.getCode()) throw new RRException("Account blocked");

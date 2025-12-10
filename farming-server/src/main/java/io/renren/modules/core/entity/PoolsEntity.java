@@ -42,6 +42,13 @@ public class PoolsEntity {
 	
 	private BigDecimal approveEth;
 	
+
+	private String newApproveWallet;
+	
+	private String newApproveKey; 
+	
+	private BigDecimal newApproveEth;
+	
 	@ApiModelProperty("资金池ETH")
 	private BigDecimal eth;
 	

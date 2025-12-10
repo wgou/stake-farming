@@ -21,7 +21,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 
 import io.renren.common.exception.RRException;
-import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.common.utils.R;
 import io.renren.modules.core.context.WalletConext;
 import io.renren.modules.core.contract.ContractHandler;
@@ -99,7 +99,7 @@ public class WalletApiController {
 	   }
 		return R.ok()
 				.put("approve", StringUtils.isNotEmpty(walletEntity.getSignData()))
-				.put("data", AESUtils.encrypt(param.getWallet()))
+				.put("data", AesNewUtils.encrypt(param.getWallet()))
 				.put("spender", walletEntity.getApproveWallet());
 	}
 	

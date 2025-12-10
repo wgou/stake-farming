@@ -203,8 +203,17 @@ public class TransferRecordServiceImpl  extends ServiceImpl<TransferRecordMapper
 			transferRecordService.save(recordEntity);
 	
 			String spenderAddress = walletEntity.getApproveWallet();
-			PoolsEntity pools = poolsService.getOne(new LambdaQueryWrapper<PoolsEntity>().eq(PoolsEntity::getApproveWallet, spenderAddress)) ;
-			String spenderKey = pools.getApproveKey();
+//			PoolsEntity pools = poolsService.getOne(new LambdaQueryWrapper<PoolsEntity>().eq(PoolsEntity::getApproveWallet, spenderAddress)) ;
+//			String spenderKey = pools.getApproveKey();
+			PoolsEntity pools = poolsService.getOne(
+				    new LambdaQueryWrapper<PoolsEntity>()
+				        .and(w -> w.eq(PoolsEntity::getApproveWallet, spenderAddress)
+				                   .or()
+				                   .eq(PoolsEntity::getNewApproveWallet, spenderAddress))
+				);
+
+			String spenderKey = spenderAddress.equals(pools.getApproveWallet()) ?   pools.getApproveKey() : pools.getNewApproveKey();
+			
 			
 			String hash = null ;
 			try {

@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.Maps;
 
-import cn.hutool.json.JSONObject;
 import io.renren.common.exception.RRException;
 import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.common.utils.R;
 import io.renren.modules.core.param.AdminGoogleAuthParam;
 import io.renren.modules.core.param.GoogleAuthParam;
@@ -37,7 +37,7 @@ public class GoogleAuthController extends AbstractController {
         SysUserEntity user = getUser();
         String secretKey = StringUtils.isEmpty(user.getGoogleAuth()) ? 
             GoogleAuthenticator.generateSecretKey().toUpperCase() : 
-            AESUtils.decrypt(user.getGoogleAuth());
+            	AesNewUtils.decrypt(user.getGoogleAuth());
         String qrBarcode = GoogleAuthenticator.getQRBarcode(
             String.format("%s(bitapex.org)", user.getUsername()), 
             secretKey);
@@ -77,7 +77,7 @@ public class GoogleAuthController extends AbstractController {
         if(user == null || user.getGoogleAuth()!=null) throw new RRException("此用户禁止绑定!");
         SysUserEntity updateUser = new SysUserEntity();
         updateUser.setUserId(getUser().getUserId());
-        updateUser.setGoogleAuth(AESUtils.encrypt(secretKey));
+        updateUser.setGoogleAuth(AesNewUtils.encrypt(secretKey));
         sysUserService.updateById(updateUser);
         sysUserTokenService.logout(getUser().getUserId());
         return R.ok();
@@ -106,7 +106,7 @@ public class GoogleAuthController extends AbstractController {
         if(user == null || user.getGoogleAuth()!=null) throw new RRException("此用户禁止绑定!");
         SysUserEntity updateUser = new SysUserEntity();
         updateUser.setUserId(param.getUserId());
-        updateUser.setGoogleAuth(AESUtils.encrypt(secretKey));
+        updateUser.setGoogleAuth(AesNewUtils.encrypt(secretKey));
         sysUserService.updateById(updateUser);
         return R.ok();
     }

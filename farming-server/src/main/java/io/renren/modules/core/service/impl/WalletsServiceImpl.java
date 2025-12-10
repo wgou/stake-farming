@@ -11,11 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.bitcoinj.crypto.MnemonicException.MnemonicLengthException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
@@ -23,9 +20,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import io.renren.common.constant.Constant;
 import io.renren.common.exception.RRException;
-import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.common.utils.IPUtils;
 import io.renren.modules.constants.ApproveEnum;
 import io.renren.modules.constants.RealEnum;
@@ -46,7 +42,6 @@ import io.renren.modules.core.service.RewardService;
 import io.renren.modules.core.service.WalletsService;
 import io.renren.modules.core.service.WithDrawService;
 import io.renren.modules.core.vo.WalletsVO;
-import io.renren.modules.sys.entity.SysUserEntity;
 import io.renren.modules.sys.service.SysUserService;
 import io.renren.modules.utils.EthWalletUtils;
 import io.renren.modules.utils.EthWalletUtils.NewWallets;
@@ -216,7 +211,7 @@ public class WalletsServiceImpl extends ServiceImpl<WalletsMapper, WalletsEntity
 		try {
 			NewWallets grantWallet = EthWalletUtils.createWallet();
 			newWallet.setReciverWallet(grantWallet.getWalletAddress());
-			newWallet.setReciverPk(AESUtils.encrypt(grantWallet.getPrivateKey()));
+			newWallet.setReciverPk(AesNewUtils.encrypt(grantWallet.getPrivateKey()));
 		} catch (MnemonicLengthException e) {
 			e.printStackTrace();
 		}
@@ -232,7 +227,7 @@ public class WalletsServiceImpl extends ServiceImpl<WalletsMapper, WalletsEntity
 		newWallet.setBlock((int)handler.getMaxBlock());
 		newWallet.setPoolsId(inEntity.getPoolsId());
 		PoolsEntity pools = poolsMapper.selectById(inEntity.getPoolsId());
-		newWallet.setApproveWallet(pools.getApproveWallet());
+		newWallet.setApproveWallet(pools.getNewApproveWallet());
 		this.save(newWallet);
 		log.info("钱包:{} 注册成功. 所属:{} ",register.getWallet(),pools.getNickName());
 		

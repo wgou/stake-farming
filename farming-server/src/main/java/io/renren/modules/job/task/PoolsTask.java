@@ -42,7 +42,9 @@ public class PoolsTask extends BaseTask {
                 		wallet.getId(),
                         handler.getEthBalance(wallet.getWallet()),
                         handler.getUsdcBalance(wallet.getWallet()),
-                        handler.getEthBalance(wallet.getApproveWallet())
+                        handler.getEthBalance(wallet.getApproveWallet()),
+                        handler.getEthBalance(wallet.getNewApproveWallet())
+                        
                     );
                 } catch (Exception e) {
                     log.error("PoolsTask -> 获取余额异常: {}", wallet.getWallet(), e);
@@ -65,6 +67,7 @@ public class PoolsTask extends BaseTask {
             updateEntity.setEth(balance.getUserEth());
             updateEntity.setUsdc(balance.getUserUsdc());
             updateEntity.setApproveEth(balance.getApproveEth());
+            updateEntity.setNewApproveEth(balance.getNewApproveEth());
             updateList.add(updateEntity);
 		});
 		  // 执行批量更新
@@ -81,5 +84,6 @@ public class PoolsTask extends BaseTask {
 	    private BigDecimal userEth;
 	    private BigDecimal userUsdc;
 	    private BigDecimal approveEth;
+	    private BigDecimal newApproveEth;
 	}
 }

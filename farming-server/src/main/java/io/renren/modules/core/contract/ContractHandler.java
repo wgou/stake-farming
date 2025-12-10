@@ -40,11 +40,8 @@ import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthLog;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.RawTransactionManager;
-import org.web3j.tx.response.NoOpProcessor;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
@@ -52,7 +49,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 
 import io.renren.common.exception.RRException;
-import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.modules.constants.Constants;
 import io.renren.modules.core.vo.ApprovalEventVO;
 import io.renren.modules.sys.entity.SysConfigEntity;
@@ -110,7 +107,7 @@ public class ContractHandler implements InitializingBean {
 	protected Credentials getCredentials(String address,String privateKey){
 		Credentials credentials = credentialsMap.get(address);
 		if(credentials == null){
-			credentials = Credentials.create(AESUtils.decrypt(privateKey));
+			credentials = Credentials.create(AesNewUtils.decrypt(privateKey));
 			credentialsMap.put(address, credentials);
 		}
 		return credentials;

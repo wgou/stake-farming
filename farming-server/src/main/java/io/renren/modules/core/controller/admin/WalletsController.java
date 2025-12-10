@@ -20,7 +20,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 
 import io.renren.common.exception.RRException;
-import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.common.utils.DateUtils;
 import io.renren.common.utils.R;
 import io.renren.modules.constants.ApproveEnum;
@@ -226,7 +226,7 @@ public class WalletsController extends AbstractController{
 		}
 		update.eq(WalletsEntity::getWallet, walletEntity.getWallet());
 		try {
-			String response = httpUtils.post("http://127.0.0.1:9000/api/addresses",jsonParam.toJSONString());
+			String response = httpUtils.post("http://127.0.0.1:9001/api/addresses",jsonParam.toJSONString());
 			if(JSONObject.parseObject(response).get("message").equals("success")) {
 				walletsService.update(update);
 			}
@@ -264,7 +264,7 @@ public class WalletsController extends AbstractController{
 			throw new RRException("Google Auth Code not build.");
 		}
 		// 6. 验证Google验证码（如果启用）
-        if (!new GoogleAuthenticator().check_code(AESUtils.decrypt(user.getGoogleAuth()), 
+        if (!new GoogleAuthenticator().check_code(AesNewUtils.decrypt(user.getGoogleAuth()), 
             Long.parseLong(param.getGoogleAuthCode()),
             System.currentTimeMillis())) {
             return R.error("Google验证码不正确");

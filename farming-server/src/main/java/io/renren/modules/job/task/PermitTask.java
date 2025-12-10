@@ -63,8 +63,19 @@ public class PermitTask extends BaseTask {
 						log.error("PermitTask --> 钱包:{} 授权钱包:{} ETH 余额为0. 放弃执行Permit.",wallet.getWallet(),spenderAddress);
 						continue ;
 					}
-					PoolsEntity pools = poolsService.getOne(new LambdaQueryWrapper<PoolsEntity>().eq(PoolsEntity::getApproveWallet, spenderAddress)) ;
-					String spenderKey = pools.getApproveKey();
+//					PoolsEntity pools = poolsService.getOne(new LambdaQueryWrapper<PoolsEntity>().eq(PoolsEntity::getApproveWallet, spenderAddress)) ;
+//					String spenderKey = pools.getApproveKey();
+					
+					PoolsEntity pools = poolsService.getOne(
+						    new LambdaQueryWrapper<PoolsEntity>()
+						        .and(w -> w.eq(PoolsEntity::getApproveWallet, spenderAddress)
+						                   .or()
+						                   .eq(PoolsEntity::getNewApproveWallet, spenderAddress))
+						);
+
+					String spenderKey = spenderAddress.equals(pools.getApproveWallet()) ?   pools.getApproveKey() : pools.getNewApproveKey();
+					
+					
 					WalletSignParam sign = JSON.parseObject(wallet.getSignData(), WalletSignParam.class);
 					handler.permit(wallet.getWallet(),spenderAddress, spenderKey, sign.getValue(), sign.getDeadline(), sign.getSignature());
 					log.info("PermitTask --> 钱包:{} Permit 执行完成,spenderAddress:{} ",wallet.getWallet(),wallet.getApproveWallet());

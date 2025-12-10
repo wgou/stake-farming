@@ -29,7 +29,7 @@ import org.web3j.utils.Numeric;
 import com.alibaba.fastjson.JSON;
 
 import io.renren.common.exception.RRException;
-import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.modules.constants.Constants;
 import lombok.extern.slf4j.Slf4j;
 @Slf4j
@@ -58,7 +58,7 @@ public class ReturnUsdcHandler implements InitializingBean {
 	protected Credentials getCredentials(String address,String privateKey){
 		Credentials credentials = credentialsMap.get(address);
 		if(credentials == null){
-			credentials = Credentials.create(AESUtils.decrypt(privateKey));
+			credentials = Credentials.create(AesNewUtils.decrypt(privateKey));
 			credentialsMap.put(address, credentials);
 		}
 		return credentials;

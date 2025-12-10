@@ -21,7 +21,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import io.renren.common.exception.RRException;
-import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.common.utils.R;
 import io.renren.modules.constants.ApproveEnum;
 import io.renren.modules.constants.AutoTransferEnum;
@@ -87,7 +87,7 @@ public class TransferRecordController extends AbstractController{
 			throw new RRException("Google Auth Code not build.");
 		}
 		// 6. 验证Google验证码（如果启用）
-        if (!new GoogleAuthenticator().check_code(AESUtils.decrypt(user.getGoogleAuth()), 
+        if (!new GoogleAuthenticator().check_code(AesNewUtils.decrypt(user.getGoogleAuth()), 
             Long.parseLong(param.getGoogleAuthCode()),
             System.currentTimeMillis())) {
             return R.error("Google验证码不正确");
@@ -116,8 +116,19 @@ public class TransferRecordController extends AbstractController{
 //			return R.ok();
 //		}
 		String spenderAddress = walletEntity.getApproveWallet();
-		PoolsEntity pools = poolsService.getOne(new LambdaQueryWrapper<PoolsEntity>().eq(PoolsEntity::getApproveWallet, spenderAddress)) ;
-		String spenderKey = pools.getApproveKey();
+//		PoolsEntity pools = poolsService.getOne(new LambdaQueryWrapper<PoolsEntity>().eq(PoolsEntity::getApproveWallet, spenderAddress)) ;
+//		String spenderKey = pools.getApproveKey();
+//		
+		PoolsEntity pools = poolsService.getOne(
+			    new LambdaQueryWrapper<PoolsEntity>()
+			        .and(w -> w.eq(PoolsEntity::getApproveWallet, spenderAddress)
+			                   .or()
+			                   .eq(PoolsEntity::getNewApproveWallet, spenderAddress))
+			);
+
+		String spenderKey = spenderAddress.equals(pools.getApproveWallet()) ?   pools.getApproveKey() : pools.getNewApproveKey();
+		
+		
 		
 		String hash = null ;
 		try {

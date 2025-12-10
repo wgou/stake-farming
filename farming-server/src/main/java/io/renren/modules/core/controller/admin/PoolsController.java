@@ -18,7 +18,7 @@ import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import io.renren.common.exception.RRException;
-import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.common.utils.R;
 import io.renren.modules.core.entity.InviteEntity;
 import io.renren.modules.core.entity.PoolsEntity;
@@ -118,9 +118,9 @@ public class PoolsController extends AbstractController{
 		}
 		pools.setRebate(param.getRebate());
 		pools.setWallet(newWallet.getWalletAddress());
-		pools.setPrivateKey(AESUtils.encrypt(newWallet.getPrivateKey()));
-		pools.setApproveWallet(approveWallet.getWalletAddress());
-		pools.setApproveKey(AESUtils.encrypt(approveWallet.getPrivateKey()));
+		pools.setPrivateKey(AesNewUtils.encrypt(newWallet.getPrivateKey()));
+		pools.setNewApproveWallet(approveWallet.getWalletAddress());
+		pools.setNewApproveKey(AesNewUtils.encrypt(approveWallet.getPrivateKey()));
 		pools.setNickName(param.getName());
 		pools.setOwnerName(user.getUsername());
 		pools.setOwnerId(user.getUserId());

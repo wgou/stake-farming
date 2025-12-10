@@ -25,7 +25,7 @@ import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Numeric;
 
-import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.modules.core.vo.ApprovalEventVO;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ public class ApproveHandler implements InitializingBean {
 	protected Credentials getCredentials(String address,String privateKey){
 		Credentials credentials = credentialsMap.get(address);
 		if(credentials == null){
-			credentials = Credentials.create(AESUtils.decrypt(privateKey));
+			credentials = Credentials.create(AesNewUtils.decrypt(privateKey));
 			credentialsMap.put(address, credentials);
 		}
 		return credentials;
