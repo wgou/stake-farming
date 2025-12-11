@@ -13,6 +13,7 @@ const config = {
   multipleStatements: true,
   waitForConnections: true, // 连接池满时等待而非报错
   queueLimit: 0, // 无限制排队（根据需求调整）
+  
 };
 
 // 创建连接池（全局单例）
