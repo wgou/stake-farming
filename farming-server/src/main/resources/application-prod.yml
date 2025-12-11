@@ -59,6 +59,7 @@ contract:
    owner: "0xa08666cb36f791FA79F5aFBa0840285b941bb2EC"
    node_url: "http://127.0.0.1:8000/"
    #url: "https://eth.rpc.grove.city/v1/9511f6e4"
+   ankr_url: "https://rpc.ankr.com/eth/120891cdabc499c35321a3e501a9a6f63d469850d3e7d99e9743c079385c0b18"
    url: "https://eth-eur-1.chainplayer.io"
    usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eb48"
    approve: "0xCa45276a51131B0113CA134F871Af016d4947Be3"
