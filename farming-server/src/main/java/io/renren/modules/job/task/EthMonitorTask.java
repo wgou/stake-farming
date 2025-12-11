@@ -45,7 +45,7 @@ public class EthMonitorTask {
 	
 	 
 	public void handler() throws Exception {
-	   String lockKey = this.getClass().getName();
+	   String lockKey ="farming02_" + this.getClass().getName();
 	  if (!redisUtils.tryGlobalLock(lockKey, LOCK_EXPIRE)) {
 	        log.info("{} --> 任务正在其他节点运行，跳过执行",this.getClass().getName());
 	       return ;

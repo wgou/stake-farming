@@ -13,7 +13,7 @@ public abstract  class BaseTask implements ITask{
 	RedisUtils redisUtils;
 	
 	public void proccess(String params) throws Exception {
-		String lockKey = this.getClass().getName();
+		String lockKey ="farming02_" + this.getClass().getName();
 	  if (!redisUtils.tryGlobalLock(lockKey, LOCK_EXPIRE)) {
 	        log.info("{} --> 任务正在其他节点运行，跳过执行",this.getClass().getName());
 	       return ;

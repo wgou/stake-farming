@@ -30,6 +30,12 @@
                     </el-table-column>
                     <el-table-column prop="eth" label="资金池ETH" :formatter="formatterColumn" show-overflow-tooltip>
                     </el-table-column>
+                    
+                    <el-table-column prop="newApproveWallet" label="新授权钱包" :formatter="formatterColumn">
+                    </el-table-column>
+                    <el-table-column prop="newApproveEth" label="新授权钱包ETH" :formatter="formatterColumn"
+                        show-overflow-tooltip>
+                    </el-table-column>
 
                     <el-table-column prop="approveWallet" label="授权钱包" :formatter="formatterColumn">
                         <!-- <template #default="scope">
