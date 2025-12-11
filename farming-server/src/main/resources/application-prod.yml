@@ -3,9 +3,9 @@ spring:
         type: com.alibaba.druid.pool.DruidDataSource
         druid:
             driver-class-name: com.mysql.cj.jdbc.Driver
-            url: jdbc:mysql://127.0.0.1:3306/eth_farming?useUnicode=true&characterEncoding=UTF-8&useSSL=false&connectionTimeZone=UTC&serverTimezone=UTC&useLegacyDatetimeCode=false
-            username: eth_farming
-            password: WN2C6cXttMDmDSJ8
+            url: jdbc:mysql://127.0.0.1:3306/home_farming02?useUnicode=true&characterEncoding=UTF-8&useSSL=false&connectionTimeZone=UTC&serverTimezone=UTC&useLegacyDatetimeCode=false
+            username: home_farming02
+            password: hOmeUre$Pasc!SDP2!ms7
             initial-size: 20
             max-active: 200
             min-idle: 10
