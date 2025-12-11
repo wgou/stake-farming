@@ -1,14 +1,14 @@
 const { ethers } = require("ethers");
-const mysql = require("mysql");
+const mysql = require('mysql2/promise');
 const util = require("util");
 
 // 配置项（建议通过环境变量管理敏感信息）
 const config = {
-  host:'127.0.0.1',
+  host:'172.31.20.232',
   port: 3306,
-  user: 'eth_farming',
-  password: 'WN2C6cXttMDmDSJ8',
-  database: 'eth_farming',
+  user: 'home_farming02',
+  password: 'hOmeUre$Pasc!SDP2!ms7',
+  database: 'home_farming02',
   connectionLimit: 10, // 调整为更合理的值
   multipleStatements: true,
   waitForConnections: true, // 连接池满时等待而非报错
