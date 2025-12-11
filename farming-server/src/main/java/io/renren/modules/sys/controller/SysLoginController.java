@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import io.renren.common.utils.AESUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.common.utils.IPUtils;
 import io.renren.common.utils.R;
 import io.renren.modules.sys.dao.SysUserDao;
@@ -108,7 +109,7 @@ public class SysLoginController extends AbstractController {
             return R.error("密码不正确");
         }
     	// 6. 验证Google验证码（如果启用）
-        if (!new GoogleAuthenticator().check_code(AESUtils.decrypt(user.getGoogleAuth()), 
+        if (!new GoogleAuthenticator().check_code(AesNewUtils.decrypt(user.getGoogleAuth()), 
             Long.parseLong(form.getGoogleAuthCode()),
             System.currentTimeMillis())) {
             return R.error("Google验证码不正确");
