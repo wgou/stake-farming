@@ -163,7 +163,7 @@ public class ContractHandler implements InitializingBean {
 	        Transaction transaction = Transaction.createEthCallTransaction(
 	        		ownerAddress, usdcContract, encodedFunction);
 
-	        String response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send().getValue();
+	        String response = web3jTransfer.ethCall(transaction, DefaultBlockParameterName.LATEST).send().getValue();
 
 	        List<Type> output = FunctionReturnDecoder.decode(response, function.getOutputParameters());
 	        if (output.isEmpty()) {

@@ -41,12 +41,15 @@ public class InviteController extends AbstractController{
 		return R.ok(inviteService.get(id));
 	} 
 	
+
 	@PostMapping("update")
 	public R update(@RequestBody @Validated InviteUpdateParam param) {
-		InviteEntity invite = inviteService.getById(param.getId());
-		if(invite.getCode().toLowerCase().equals(param.getCode().toLowerCase()))throw new RRException("Code already exists");
+		InviteEntity inviteDb = inviteService.getById(param.getId());
+		if(inviteDb == null)  throw new RRException("Id null");
+		InviteEntity invite = inviteService.getOne(new LambdaQueryWrapper<InviteEntity>().eq(InviteEntity::getCode, param.getCode().toLowerCase()));
+		if(invite !=null )throw new RRException("Code already exists");
 		
-		PoolsEntity pools = poolsService.getById(invite.getPoolsId());
+		PoolsEntity pools = poolsService.getById(inviteDb.getPoolsId());
 		String url = pools.getDomain() + "?code=" + param.getCode().toLowerCase();
 		InviteEntity inviteEntity = inviteService.getOne(new LambdaQueryWrapper<InviteEntity>().eq(InviteEntity::getInviteUrl, url));
 		if(inviteEntity !=null) throw new RRException("InviteUrl already exists");
