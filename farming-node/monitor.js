@@ -13,14 +13,12 @@ const config = {
   multipleStatements: true,
   waitForConnections: true, // 连接池满时等待而非报错
   queueLimit: 0, // 无限制排队（根据需求调整）
-  
+
 };
 
 // 创建连接池（全局单例）
 const db = mysql.createPool(config);
-
-// 将回调风格的 query 方法转换为 Promise
-db.query = util.promisify(db.query).bind(db);
+ 
 
 // 初始化 WebSocket 提供者
 let provider;
@@ -51,32 +49,22 @@ const logTime = (message) => {
   console.log(`${message} [${formattedTime}]`);
 };
 
-// 查询钱包信息（缓存优化）
-const walletCache = new Map(); // 简单内存缓存
 const queryWallet = async (walletAddress) => {
-  const lowerCaseAddress = walletAddress.toLowerCase();
-  
-  // 优先从缓存读取
-  if (walletCache.has(lowerCaseAddress)) {
-    return walletCache.get(lowerCaseAddress);
-  }
-
+  const lowerCaseAddress = walletAddress.toLowerCase()
   try {
-    const results = await db.query(
-      `SELECT wallet, pools_id FROM s_wallets WHERE LOWER(wallet) = ?`,
-      [lowerCaseAddress]
-    );
-
-    if (results.length > 0) {
-      walletCache.set(lowerCaseAddress, results[0]); // 写入缓存
-      return results[0];
-    }
+   const [rows] = await db.query(
+    `SELECT wallet, pools_id FROM s_wallets WHERE LOWER(wallet) = ?`,
+    [lowerCaseAddress]
+  );
+  if (rows.length > 0) {
+      return rows[0];
+  }
     return null;
   } catch (err) {
-    console.error(`Error querying wallet ${lowerCaseAddress}:`, err);
+    console.error(`Error querying wallet ${lowerCaseAddress}: ${err}`);
     throw err; // 向上抛出错误
   }
-};
+}; 
 
 // 处理转账事件（批量插入优化）
 const handleTransferEvent = async (from, to, value, hash) => {
