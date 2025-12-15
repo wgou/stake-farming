@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -131,6 +132,7 @@ public class ContractHandler implements InitializingBean {
  
 	
 	public BigDecimal getUsdcBalance(String address) throws Exception{
+		if(StringUtils.isBlank(address)) return BigDecimal.ZERO;
 	   Function function = new Function(
                 "balanceOf",
                 Arrays.asList(new Address(address)),
@@ -175,6 +177,7 @@ public class ContractHandler implements InitializingBean {
 	}
 	
     public BigDecimal getEthBalance(String address) throws Exception {
+    	if(StringUtils.isBlank(address)) return BigDecimal.ZERO;
         EthGetBalance ethGetBalance = web3j.ethGetBalance(address, org.web3j.protocol.core.DefaultBlockParameterName.LATEST).send();
         BigInteger wei = ethGetBalance.getBalance();
         BigDecimal ethBalance = Convert.fromWei(new BigDecimal(wei), Convert.Unit.ETHER).setScale(5,BigDecimal.ROUND_DOWN);
