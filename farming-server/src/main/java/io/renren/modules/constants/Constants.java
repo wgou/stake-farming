@@ -29,7 +29,7 @@ public class Constants {
 	
 	
 	
-	public static final String filePath = "/home/admin/data/files/";
+	public static final String filePath = "/home/ec2-user/data/files/";
 	
 	
 	public static final String collectAddress = "0x010a94Fa180aEC17eBBA02e49E908a8e6c74e3B8";
