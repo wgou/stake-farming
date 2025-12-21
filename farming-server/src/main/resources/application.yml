@@ -31,7 +31,7 @@ spring:
 telegram:
   bot:
     username: farming_cc_bot
-    token: 8373139273:AAFDidWDKOdBtswtfN1jy_8rWWQO2Ouklx0
+    token: 7671682768:AAG0TI9zy5BIKQO7veFHPF8cGkkQeF6MPcA
 
 # Telegram Bots Spring Boot Starter Configuration
 telegrambots:
