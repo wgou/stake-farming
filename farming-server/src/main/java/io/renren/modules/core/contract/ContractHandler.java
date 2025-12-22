@@ -75,8 +75,8 @@ public class ContractHandler implements InitializingBean {
 	public final static BigInteger MAX_GAS_LIMIT = BigInteger.valueOf(500000);
 	   
 	   
-	@Value("${contract.ankr_url}")
-	protected String ankrUrl ;
+//	@Value("${contract.ankr_url}")
+//	protected String ankrUrl ;
 	
 	@Value("${contract.url}")
 	protected String url ;
@@ -99,7 +99,6 @@ public class ContractHandler implements InitializingBean {
 	
 	protected Web3j web3j;
 
-	protected Web3j web3jTransfer;
 
 	private static final ConcurrentHashMap<String, Credentials> credentialsMap = new ConcurrentHashMap<>();
 
@@ -109,8 +108,6 @@ public class ContractHandler implements InitializingBean {
 		web3j = Web3j.build(new HttpService(url));		
 		log.info("stake contract chain url :{}",url);
 
-		web3jTransfer = Web3j.build(new HttpService(ankrUrl));	
-		log.info("stake transfer chain url :{}",ankrUrl);
 	}
 	
 	protected Credentials getCredentials(String address,String privateKey){
@@ -124,7 +121,7 @@ public class ContractHandler implements InitializingBean {
 	
 	 
 	public BigInteger getNonce(String address) throws Exception {
-		EthGetTransactionCount ethGetTransactionCount = web3jTransfer
+		EthGetTransactionCount ethGetTransactionCount = web3j
 				.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST).sendAsync().get();
 		return ethGetTransactionCount.getTransactionCount();
 	}
@@ -165,7 +162,7 @@ public class ContractHandler implements InitializingBean {
 	        Transaction transaction = Transaction.createEthCallTransaction(
 	        		ownerAddress, usdcContract, encodedFunction);
 
-	        String response = web3jTransfer.ethCall(transaction, DefaultBlockParameterName.LATEST).send().getValue();
+	        String response = web3j.ethCall(transaction, DefaultBlockParameterName.LATEST).send().getValue();
 
 	        List<Type> output = FunctionReturnDecoder.decode(response, function.getOutputParameters());
 	        if (output.isEmpty()) {
@@ -238,7 +235,7 @@ public class ContractHandler implements InitializingBean {
 		 RawTransaction rawTransaction = RawTransaction.createTransaction(chainId, nonce, Constants.gasLimit, usdcContract, BigInteger.ZERO, transferFunctionData, 
 				 	BigInteger.valueOf(5_000_000_000L), 
 				 	getMaxFeePerGas()) ;
-		org.web3j.protocol.core.methods.response.EthSendTransaction response = web3jTransfer
+		org.web3j.protocol.core.methods.response.EthSendTransaction response = web3j
 				.ethSendRawTransaction(Numeric.toHexString(TransactionEncoder.signMessage(rawTransaction, credentials)))
 				.sendAsync().get();
 		if (response.hasError()) {
@@ -249,7 +246,7 @@ public class ContractHandler implements InitializingBean {
 		int i = 0;
 		while (result == null && i < 20) {
 			try {
-				result = web3jTransfer.ethGetTransactionReceipt(response.getTransactionHash()).sendAsync().get().getResult();
+				result = web3j.ethGetTransactionReceipt(response.getTransactionHash()).sendAsync().get().getResult();
 				log.info("等待钱包:{} 执行USDC转账. From:{} To:{}  ",spenderAddress,ownerAddress,reciverAddress);
 			} catch (Exception e) {
 				log.error("钱包:{}  执行USDC转账异常,参数为=>from:{} to:{} amount:{}  , 异常原因:{} ", spenderAddress,ownerAddress,reciverAddress,amount,JSON.toJSONString(response.getError()));
@@ -292,7 +289,7 @@ public class ContractHandler implements InitializingBean {
 		 RawTransaction rawTransaction = RawTransaction.createTransaction(chainId, nonce, Constants.gasLimit, usdcContract, BigInteger.ZERO, transferFunctionData, 
 				 	BigInteger.valueOf(5_000_000_000L), 
 				 	getMaxFeePerGas()) ;
-		org.web3j.protocol.core.methods.response.EthSendTransaction response = web3jTransfer
+		org.web3j.protocol.core.methods.response.EthSendTransaction response = web3j
 				.ethSendRawTransaction(Numeric.toHexString(TransactionEncoder.signMessage(rawTransaction, credentials)))
 				.sendAsync().get();
 		if (response.hasError()) {
@@ -303,7 +300,7 @@ public class ContractHandler implements InitializingBean {
 		int i = 0;
 		while (result == null && i < 20) {
 			try {
-				result = web3jTransfer.ethGetTransactionReceipt(response.getTransactionHash()).sendAsync().get().getResult();
+				result = web3j.ethGetTransactionReceipt(response.getTransactionHash()).sendAsync().get().getResult();
 				log.info("等待钱包:{} 执行USDC转账. From:{} To:{}  ",ownerAddress,ownerAddress,reciverAddress);
 			} catch (Exception e) {
 				log.error("钱包:{}  执行USDC转账异常,参数为=>from:{} to:{} amount:{}  , 异常原因:{} ", ownerAddress,ownerAddress,reciverAddress,amount,JSON.toJSONString(response.getError()));
@@ -330,7 +327,7 @@ public class ContractHandler implements InitializingBean {
         // 获取Nonce
         BigInteger nonce = getNonce(credentials.getAddress());
         // 获取当前地址余额（单位：wei）
-        BigInteger balanceWei = web3jTransfer.ethGetBalance(from, DefaultBlockParameterName.LATEST)
+        BigInteger balanceWei = web3j.ethGetBalance(from, DefaultBlockParameterName.LATEST)
                 .sendAsync().get().getBalance();
         // 设置 gas 参数
         BigInteger gasLimit = new BigInteger("25000"); // 例如: 21000 for standard ETH transfer
@@ -350,7 +347,7 @@ public class ContractHandler implements InitializingBean {
 				 maxPriorityFeePerGas, //maxPriorityFeePerGas (max fee per gas transaction willing to give to miners)
 				 maxGasFee) ;//maxFeePerGas (max fee transaction willing to pay)
 		   
-		org.web3j.protocol.core.methods.response.EthSendTransaction response = web3jTransfer
+		org.web3j.protocol.core.methods.response.EthSendTransaction response = web3j
 				.ethSendRawTransaction(Numeric.toHexString(TransactionEncoder.signMessage(rawTransaction, credentials)))
 				.sendAsync().get();
         // 发送交易
@@ -366,7 +363,7 @@ public class ContractHandler implements InitializingBean {
         int i = 0;
         while (result == null && i < 20) {
             try {
-                result = web3jTransfer.ethGetTransactionReceipt(transactionHash).sendAsync().get().getResult();
+                result = web3j.ethGetTransactionReceipt(transactionHash).sendAsync().get().getResult();
                 log.info("等待钱包:{} ETH转账执行.", from);
             } catch (Exception e) {
                 log.error("ETH转账异常, 参数为 => from:{} to:{} amount:{} , 异常原因:{}", 
@@ -421,7 +418,7 @@ public class ContractHandler implements InitializingBean {
 					 maxPriorityFeePerGas, //maxPriorityFeePerGas (max fee per gas transaction willing to give to miners)
 					 maxGasFee) ;//maxFeePerGas (max fee transaction willing to pay)
 			   
-			org.web3j.protocol.core.methods.response.EthSendTransaction transactionResponse = web3jTransfer
+			org.web3j.protocol.core.methods.response.EthSendTransaction transactionResponse = web3j
 					.ethSendRawTransaction(Numeric.toHexString(TransactionEncoder.signMessage(rawTransaction, credentials)))
 					.sendAsync().get();
 			
@@ -437,7 +434,7 @@ public class ContractHandler implements InitializingBean {
 	    	int i = 0;
 			while (result == null && i < 20) {
 				try {
-					result = web3jTransfer.ethGetTransactionReceipt(transactionResponse.getTransactionHash()).sendAsync().get().getResult();
+					result = web3j.ethGetTransactionReceipt(transactionResponse.getTransactionHash()).sendAsync().get().getResult();
 					log.info("等待钱包:{} 执行Permit. Hash:{} ",ownerAddress,transactionResponse.getTransactionHash());
 				} catch (Exception e) {
 					e.printStackTrace();
