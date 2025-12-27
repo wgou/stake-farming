@@ -81,13 +81,16 @@ public class IPUtils {
         } catch (Exception e) {
         	log.error("IPUtils ERROR ", e);
         }
-        
-//        //使用代理，则获取第一个IP地址
-//        if(StringUtils.isEmpty(ip) && ip.length() > 15) {
-//			if(ip.indexOf(",") > 0) {
-//				ip = ip.substring(0, ip.indexOf(","));
-//			}
-//		}
+        if(!StringUtils.isEmpty(ip) && ip.length() > 15 ) {
+       	 for (String _ip : ip.split(",")) {
+       		 _ip = _ip.trim();
+                // 优先 IPv4
+                if (_ip.contains(".") && !"unknown".equalsIgnoreCase(ip)) {
+               	 ip = _ip;
+               	 break ;
+                }
+       	 }
+		}
         
         return ip;
     }
