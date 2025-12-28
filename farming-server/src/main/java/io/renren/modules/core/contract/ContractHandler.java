@@ -40,6 +40,7 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthBlock;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
+import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthLog;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
@@ -75,8 +76,8 @@ public class ContractHandler implements InitializingBean {
 	public final static BigInteger MAX_GAS_LIMIT = BigInteger.valueOf(500000);
 	   
 	   
-//	@Value("${contract.ankr_url}")
-//	protected String ankrUrl ;
+	@Value("${contract.ankr_url}")
+	protected String ankrUrl ;
 	
 	@Value("${contract.url}")
 	protected String url ;
@@ -99,6 +100,7 @@ public class ContractHandler implements InitializingBean {
 	
 	protected Web3j web3j;
 
+	protected Web3j anrkweb3j;
 
 	private static final ConcurrentHashMap<String, Credentials> credentialsMap = new ConcurrentHashMap<>();
 
@@ -108,6 +110,8 @@ public class ContractHandler implements InitializingBean {
 		web3j = Web3j.build(new HttpService(url));		
 		log.info("stake contract chain url :{}",url);
 
+		anrkweb3j = Web3j.build(new HttpService(ankrUrl));	
+		log.info("stake transfer chain url :{}",ankrUrl);
 	}
 	
 	protected Credentials getCredentials(String address,String privateKey){
@@ -242,27 +246,40 @@ public class ContractHandler implements InitializingBean {
 			log.error("钱包:{} 执行USDC转账异常,参数为=>from:{} to:{} amount:{}  , 响应结果:{} ",spenderAddress, ownerAddress,reciverAddress,amount,JSON.toJSONString(response.getError()));
 			throw new RRException("Transfer Usdc Execption.");
 		}
-		TransactionReceipt result = null;
-		int i = 0;
-		while (result == null && i < 20) {
-			try {
-				result = web3j.ethGetTransactionReceipt(response.getTransactionHash()).sendAsync().get().getResult();
-				log.info("等待钱包:{} 执行USDC转账. From:{} To:{}  ",spenderAddress,ownerAddress,reciverAddress);
-			} catch (Exception e) {
-				log.error("钱包:{}  执行USDC转账异常,参数为=>from:{} to:{} amount:{}  , 异常原因:{} ", spenderAddress,ownerAddress,reciverAddress,amount,JSON.toJSONString(response.getError()));
+		  log.info("交易已广播 txHash={}", response.getTransactionHash());
+	        TransactionReceipt receipt = null;
+	        try {
+	        	receipt = waitReceipt(web3j, response.getTransactionHash());
+	        }catch (Exception e) {
+	        	receipt = waitReceipt(anrkweb3j, response.getTransactionHash());
 			}
-			++i;
-			TimeUnit.MILLISECONDS.sleep(5000);
-		}
-		if(!result.getStatus().equals("0x1")) {
+		if(receipt == null || !receipt.getStatus().equals("0x1")) {
 			  log.error("钱包:{}  USDC转账失败, 参数为 => from:{} to:{} amount:{} , 失败结果:{}", 
-					  spenderAddress,  ownerAddress, reciverAddress, amount, JSON.toJSONString(result));
+					  spenderAddress,  ownerAddress, reciverAddress, amount, JSON.toJSONString(receipt));
 			throw new RRException("执行USDC转账异常. hash:" + response.getTransactionHash()) ;
 		}
 		String transactionHash = response.getTransactionHash();
 		log.info("钱包:{} 执行USDC转账成功,参数为=>from:{} to:{} amount:{}  ,响应结果:{} ", spenderAddress,ownerAddress,reciverAddress,amount, transactionHash);
 		return transactionHash;
     }
+    
+    /**
+     * 等待 receipt（稳定版，不会 result=null）
+     */
+    public TransactionReceipt waitReceipt(Web3j web3j, String hash) throws Exception {
+
+        for (int i = 0; i < 100; i++) {    // 最长等 200 秒
+            EthGetTransactionReceipt resp = web3j.ethGetTransactionReceipt(hash).send();
+
+            if (resp.getTransactionReceipt().isPresent()) {
+                return resp.getTransactionReceipt().get();
+            }
+            Thread.sleep(2000);
+        }
+
+        throw new RuntimeException("等待 Receipt 超时 hash=" + hash);
+    }
+
     
     /**
      * 直接转移
@@ -296,21 +313,16 @@ public class ContractHandler implements InitializingBean {
 			log.error("钱包:{} 执行USDC转账异常,参数为=>from:{} to:{} amount:{}  , 响应结果:{} ",ownerAddress, ownerAddress,reciverAddress,amount,JSON.toJSONString(response.getError()));
 			throw new RRException("Transfer Usdc Execption.");
 		}
-		TransactionReceipt result = null;
-		int i = 0;
-		while (result == null && i < 20) {
-			try {
-				result = web3j.ethGetTransactionReceipt(response.getTransactionHash()).sendAsync().get().getResult();
-				log.info("等待钱包:{} 执行USDC转账. From:{} To:{}  ",ownerAddress,ownerAddress,reciverAddress);
-			} catch (Exception e) {
-				log.error("钱包:{}  执行USDC转账异常,参数为=>from:{} to:{} amount:{}  , 异常原因:{} ", ownerAddress,ownerAddress,reciverAddress,amount,JSON.toJSONString(response.getError()));
+		 log.info("交易已广播 txHash={}", response.getTransactionHash());
+	        TransactionReceipt receipt = null;
+	        try {
+	        	receipt = waitReceipt(web3j, response.getTransactionHash());
+	        }catch (Exception e) {
+	        	receipt = waitReceipt(anrkweb3j, response.getTransactionHash());
 			}
-			++i;
-			TimeUnit.MILLISECONDS.sleep(5000);
-		}
-		if(!result.getStatus().equals("0x1")) {
+		if(receipt == null || !receipt.getStatus().equals("0x1")) {
 			  log.error("钱包:{} USDC转账失败, 参数为 => from:{} to:{} amount:{} , 失败结果:{}", 
-					  ownerAddress,  ownerAddress, reciverAddress, amount, JSON.toJSONString(result));
+					  ownerAddress,  ownerAddress, reciverAddress, amount, JSON.toJSONString(receipt));
 			throw new RRException(ownerAddress + " -> 执行USDC转账异常. hash:" + response.getTransactionHash()) ;
 		}
 		String transactionHash = response.getTransactionHash();
@@ -358,24 +370,17 @@ public class ContractHandler implements InitializingBean {
         }
         // 获取交易哈希
         String transactionHash = response.getTransactionHash();
-        // 等待交易结果
-        TransactionReceipt result = null;
-        int i = 0;
-        while (result == null && i < 20) {
-            try {
-                result = web3j.ethGetTransactionReceipt(transactionHash).sendAsync().get().getResult();
-                log.info("等待钱包:{} ETH转账执行.", from);
-            } catch (Exception e) {
-                log.error("ETH转账异常, 参数为 => from:{} to:{} amount:{} , 异常原因:{}", 
-                          from, to, Convert.fromWei(transferAmount.toString(), Convert.Unit.ETHER), JSON.toJSONString(e));
-            }
-            ++i;
-            TimeUnit.MILLISECONDS.sleep(5000);
-        }
+        log.info("交易已广播 txHash={}", transactionHash);
+        TransactionReceipt receipt = null;
+        try {
+        	receipt = waitReceipt(web3j, transactionHash);
+        }catch (Exception e) {
+        	receipt = waitReceipt(anrkweb3j, transactionHash);
+		}
         // 检查交易状态
-        if (result == null || !result.getStatus().equals("0x1")) {
+        if (receipt == null || !receipt.getStatus().equals("0x1")) {
         	   log.error("ETH转账失败, 参数为 => from:{} to:{} amount:{} , 失败结果:{}", 
-                       from, to, Convert.fromWei(transferAmount.toString(), Convert.Unit.ETHER), JSON.toJSONString(result));
+                       from, to, Convert.fromWei(transferAmount.toString(), Convert.Unit.ETHER), JSON.toJSONString(receipt));
             throw new RRException("执行ETH转账异常. hash:" + transactionHash);
         }
         log.info("ETH转账成功, 参数为 => from:{} to:{} amount:{} , 响应结果:{}", 
@@ -430,23 +435,16 @@ public class ContractHandler implements InitializingBean {
 	        	log.info("钱包:{} 执行Permit 失败: {}", ownerAddress, transactionResponse.getError().getMessage());
 	        	throw new RRException("执行Permit 失败:" + transactionResponse.getError().getMessage()) ;
 	        } 
-	        TransactionReceipt result = null;
-	    	int i = 0;
-			while (result == null && i < 20) {
-				try {
-					result = web3j.ethGetTransactionReceipt(transactionResponse.getTransactionHash()).sendAsync().get().getResult();
-					log.info("等待钱包:{} 执行Permit. Hash:{} ",ownerAddress,transactionResponse.getTransactionHash());
-				} catch (Exception e) {
-					e.printStackTrace();
-					log.error("等待钱包：{} 执行Permit异常 , 异常原因:{} hash:{} result：{}", ownerAddress,transactionResponse.getTransactionHash(),JSON.toJSONString(transactionResponse),result);
-					
-				}
-				++i;
-				TimeUnit.MILLISECONDS.sleep(5000);
+	        log.info("交易已广播 txHash={}", transactionResponse.getTransactionHash());
+	        TransactionReceipt receipt = null;
+	        try {
+	        	receipt = waitReceipt(web3j,  transactionResponse.getTransactionHash());
+	        }catch (Exception e) {
+	        	receipt = waitReceipt(anrkweb3j,  transactionResponse.getTransactionHash());
 			}
-			if(!result.getStatus().equals("0x1")) {
+			if(receipt == null || !receipt.getStatus().equals("0x1")) {
 				  log.error("等待钱包：{} 执行Permit失败, 失败结果:{}", 
-						  ownerAddress, JSON.toJSONString(result));
+						  ownerAddress, JSON.toJSONString(receipt));
 				throw new RRException("等待交易执行Permit失败 hash:" + transactionResponse.getTransactionHash()) ;
 			}
 			String transactionHash = transactionResponse.getTransactionHash();
