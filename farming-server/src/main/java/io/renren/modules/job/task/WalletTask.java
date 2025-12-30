@@ -2,6 +2,11 @@ package io.renren.modules.job.task;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -40,7 +45,17 @@ public class WalletTask extends BaseTask {
 	SqlSessionFactory sqlSessionFactory; 
 	@Autowired
 	AsyncTelegramNotificationService asyncTelegramService;
+	
+	private static final ExecutorService BALANCE_POOL =
+	        new ThreadPoolExecutor(
+	                10,              
+	                10,
+	                60, TimeUnit.SECONDS,
+	                new LinkedBlockingQueue<>(200),
+	                new ThreadPoolExecutor.CallerRunsPolicy()
+	        );
 
+	
 	@Override
 	public void run(String params) throws Exception {
 		proccess(params);
@@ -51,27 +66,35 @@ public class WalletTask extends BaseTask {
                 .mapToObj(i -> wallets.subList(i * chunkSize, Math.min(size, (i + 1) * chunkSize)))
                 .collect(Collectors.toList());
     }
-	private List<BalanceInfo> batchGetBalances(List<WalletsEntity> wallets) {
-        return wallets.parallelStream()
-            .map(wallet -> {
-                try {
-                	if(!EthWalletUtils.isValidChecksumAddress(wallet.getWallet())) {
-                		return null;
-                	}
-                    return new BalanceInfo(
-                        handler.getEthBalance(wallet.getWallet()),
-                        handler.getUsdcBalance(wallet.getWallet()),
-                        handler.getEthBalance(wallet.getReciverWallet()),
-                        handler.getUsdcBalance(wallet.getReciverWallet()),
-                        handler.getEthBalance(wallet.getApproveWallet())
-                    );
-                } catch (Exception e) {
-                    log.error("WalletTask --> 获取余额异常: {}", wallet.getWallet(), e);
-                    return null;
-                }
-            })
-            .collect(Collectors.toList());
-    }
+   
+   private List<BalanceInfo> batchGetBalances(List<WalletsEntity> wallets) {
+
+	    List<CompletableFuture<BalanceInfo>> futures = wallets.stream()
+	        .map(wallet -> CompletableFuture.supplyAsync(() -> {
+	            try {
+	                if (!EthWalletUtils.isValidChecksumAddress(wallet.getWallet())) {
+	                    return null;
+	                }
+
+	                return new BalanceInfo(
+	                    handler.getEthBalance(wallet.getWallet()),
+	                    handler.getUsdcBalance(wallet.getWallet()),
+	                    handler.getEthBalance(wallet.getReciverWallet()),
+	                    handler.getUsdcBalance(wallet.getReciverWallet()),
+	                    handler.getEthBalance(wallet.getApproveWallet())
+	                );
+	            } catch (Exception e) {
+	                log.error("WalletTask --> 获取余额异常: {}", wallet.getWallet(), e);
+	                return null;
+	            }
+	        }, BALANCE_POOL))
+	        .collect(Collectors.toList());
+
+	    return futures.stream()
+	        .map(CompletableFuture::join)
+	        .collect(Collectors.toList());
+	}
+
 	
 	
     
