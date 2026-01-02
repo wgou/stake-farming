@@ -24,7 +24,7 @@ const db = mysql.createPool(config);
 let provider;
 const initWebSocketProvider = () => {
   provider = new ethers.providers.WebSocketProvider(
-    "wss://eth-eur-1.chainplayer.io:21108"
+    "wss://eth-test.chainplayer.io:51008"
   );
 
   provider._websocket.on('close', async () => {

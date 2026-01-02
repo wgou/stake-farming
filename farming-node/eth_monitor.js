@@ -186,7 +186,7 @@ app.post('/api/addresses', async (req, res) => {
 
 
 const monitor = new EthAddressMonitor(
-    "wss://eth-eur-1.chainplayer.io:21108"
+    "wss://eth-test.chainplayer.io:51008"
 );
 
 
