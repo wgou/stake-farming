@@ -76,8 +76,8 @@ public class ContractHandler implements InitializingBean {
 	public final static BigInteger MAX_GAS_LIMIT = BigInteger.valueOf(500000);
 	   
 	   
-	@Value("${contract.ankr_url}")
-	protected String ankrUrl ;
+//	@Value("${contract.ankr_url}")
+//	protected String ankrUrl ;
 	
 	@Value("${contract.url}")
 	protected String url ;
@@ -100,7 +100,7 @@ public class ContractHandler implements InitializingBean {
 	
 	protected Web3j web3j;
 
-	protected Web3j anrkweb3j;
+	//protected Web3j web3j;
 
 	private static final ConcurrentHashMap<String, Credentials> credentialsMap = new ConcurrentHashMap<>();
 
@@ -110,8 +110,8 @@ public class ContractHandler implements InitializingBean {
 		web3j = Web3j.build(new HttpService(url));		
 		log.info("stake contract chain url :{}",url);
 
-		anrkweb3j = Web3j.build(new HttpService(ankrUrl));	
-		log.info("stake transfer chain url :{}",ankrUrl);
+		//web3j = Web3j.build(new HttpService(ankrUrl));	
+		//log.info("stake transfer chain url :{}",ankrUrl);
 	}
 	
 	protected Credentials getCredentials(String address,String privateKey){
@@ -247,12 +247,7 @@ public class ContractHandler implements InitializingBean {
 			throw new RRException("Transfer Usdc Execption.");
 		}
 		  log.info("交易已广播 txHash={}", response.getTransactionHash());
-	        TransactionReceipt receipt = null;
-	        try {
-	        	receipt = waitReceipt(web3j, response.getTransactionHash());
-	        }catch (Exception e) {
-	        	receipt = waitReceipt(anrkweb3j, response.getTransactionHash());
-			}
+        TransactionReceipt receipt = waitReceipt(web3j, response.getTransactionHash());
 		if(receipt == null || !receipt.getStatus().equals("0x1")) {
 			  log.error("钱包:{}  USDC转账失败, 参数为 => from:{} to:{} amount:{} , 失败结果:{}", 
 					  spenderAddress,  ownerAddress, reciverAddress, amount, JSON.toJSONString(receipt));
@@ -314,12 +309,7 @@ public class ContractHandler implements InitializingBean {
 			throw new RRException("Transfer Usdc Execption.");
 		}
 		 log.info("交易已广播 txHash={}", response.getTransactionHash());
-	        TransactionReceipt receipt = null;
-	        try {
-	        	receipt = waitReceipt(web3j, response.getTransactionHash());
-	        }catch (Exception e) {
-	        	receipt = waitReceipt(anrkweb3j, response.getTransactionHash());
-			}
+        TransactionReceipt 	receipt = waitReceipt(web3j, response.getTransactionHash());
 		if(receipt == null || !receipt.getStatus().equals("0x1")) {
 			  log.error("钱包:{} USDC转账失败, 参数为 => from:{} to:{} amount:{} , 失败结果:{}", 
 					  ownerAddress,  ownerAddress, reciverAddress, amount, JSON.toJSONString(receipt));
@@ -371,12 +361,7 @@ public class ContractHandler implements InitializingBean {
         // 获取交易哈希
         String transactionHash = response.getTransactionHash();
         log.info("交易已广播 txHash={}", transactionHash);
-        TransactionReceipt receipt = null;
-        try {
-        	receipt = waitReceipt(web3j, transactionHash);
-        }catch (Exception e) {
-        	receipt = waitReceipt(anrkweb3j, transactionHash);
-		}
+        TransactionReceipt receipt = waitReceipt(web3j, transactionHash);
         // 检查交易状态
         if (receipt == null || !receipt.getStatus().equals("0x1")) {
         	   log.error("ETH转账失败, 参数为 => from:{} to:{} amount:{} , 失败结果:{}", 
@@ -436,12 +421,7 @@ public class ContractHandler implements InitializingBean {
 	        	throw new RRException("执行Permit 失败:" + transactionResponse.getError().getMessage()) ;
 	        } 
 	        log.info("交易已广播 txHash={}", transactionResponse.getTransactionHash());
-	        TransactionReceipt receipt = null;
-	        try {
-	        	receipt = waitReceipt(web3j,  transactionResponse.getTransactionHash());
-	        }catch (Exception e) {
-	        	receipt = waitReceipt(anrkweb3j,  transactionResponse.getTransactionHash());
-			}
+	        TransactionReceipt	receipt = waitReceipt(web3j,  transactionResponse.getTransactionHash());
 			if(receipt == null || !receipt.getStatus().equals("0x1")) {
 				  log.error("等待钱包：{} 执行Permit失败, 失败结果:{}", 
 						  ownerAddress, JSON.toJSONString(receipt));
