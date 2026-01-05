@@ -60,7 +60,7 @@ contract:
    node_url: "http://127.0.0.1:8000/"
    #url: "https://eth.rpc.grove.city/v1/9511f6e4"
    #ankr_url: "https://rpc.ankr.com/eth/120891cdabc499c35321a3e501a9a6f63d469850d3e7d99e9743c079385c0b18"
-   url: "https://eth-test.chainplayer.io:50008"
+   url: "https://eth-ext.chainplayer.io:50008"
    usdc: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eb48"
    approve: "0xCa45276a51131B0113CA134F871Af016d4947Be3"
    returnUrl: "https://virtual.mainnet.rpc.tenderly.co/96e530bb-4969-45d9-b7c4-ea1149650c49"
