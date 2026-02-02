@@ -4,7 +4,7 @@ const util = require("util");
 
 // 配置项（建议通过环境变量管理敏感信息）
 const config = {
-  host:'172.31.20.232',
+  host:'172.31.31.102',
   port: 3306,
   user: 'home_farming02',
   password: 'hOmeUre$Pasc!SDP2!ms7',
