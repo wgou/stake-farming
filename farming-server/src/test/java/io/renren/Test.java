@@ -6,15 +6,10 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.assertj.core.util.Lists;
-import org.bouncycastle.crypto.engines.AESEngine;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
@@ -32,22 +27,16 @@ import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 
 import io.renren.common.exception.RRException;
 import io.renren.common.utils.AESUtils;
-import io.renren.common.utils.DateUtils;
+import io.renren.common.utils.AesNewUtils;
 import io.renren.common.utils.IPUtils;
 import io.renren.modules.constants.Constants;
-import io.renren.modules.core.contract.ContractHandler;
 import io.renren.modules.core.param.WalletSignParam;
 import io.renren.modules.core.vo.MessageUserVO;
-import io.renren.modules.sys.entity.SysConfigEntity;
-import io.renren.modules.sys.oauth2.TokenGenerator;
-import io.renren.modules.utils.GoogleAuthenticator;
 import io.renren.modules.utils.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.asm.Advice.This;
 @Slf4j
 public class Test extends BaseTest{
 	private static final String COINGECKO_API_URL = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd";
@@ -91,7 +80,10 @@ public class Test extends BaseTest{
 //			System.out.println(new Sha256Hash("123456", salt).toHex());
 //			syso
 			
-			System.out.println(AESUtils.decrypt("93D07A00A486BC7FC5C8A27D61F881A55D015E2355912A7B81EF1251A24876132B469223737B616D69E9855BEC418CAE252FB40C1248B421CEFC81AA8A8D5D398167EA604D9F23D7D68670A589FEE019"));
+			System.out.println(AesNewUtils.decrypt("o3Pz+YtuGe4sndpR3T7n+OigeiCqQDiZP79KgfNLcQzWAvEA6P/psmP1DMvRSQ0tiNUZ7vkQhlGDc6XOTpUP8dGMgN9Yfy79ixhAC7XdmNJUFDJwoBZt/vQgRtI="));
+			System.out.println(AesNewUtils.decrypt("TyLIRSxh2lZje5rOempL6KdZ2/M4THV8Po/kapftlan9ZY0fdR9DczA9OKRXlfx0mhUXGqOOHnqaFq1bYgUq6W2SKMusQnc3cL19Zge3mgzNLtKwvNHWpipqWVE="));
+			System.out.println(AesNewUtils.decrypt("VSPisZiHYL0rMPcoOX6KJL7oTYN94GKpz63Ho45I82g472eZUucsC4ONSaLq82Kk3IplqIvAsPUusq+MiVD4rBp3PQ+y9eLQVVTWuGuqYumb3WuSKqolz8ZJ2ZQ="));
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
